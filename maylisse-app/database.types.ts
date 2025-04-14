@@ -9,10 +9,156 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      deliveryman: {
+      article: {
+        Row: {
+          categorie: Database["public"]["Enums"]["article_category"]
+          description: string | null
+          id: number
+          quantity: number | null
+        }
+        Insert: {
+          categorie: Database["public"]["Enums"]["article_category"]
+          description?: string | null
+          id?: number
+          quantity?: number | null
+        }
+        Update: {
+          categorie?: Database["public"]["Enums"]["article_category"]
+          description?: string | null
+          id?: number
+          quantity?: number | null
+        }
+        Relationships: []
+      }
+      carboard: {
+        Row: {
+          description: string | null
+          id: number
+          id_command: number | null
+          quantityMax: number | null
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          id_command?: number | null
+          quantityMax?: number | null
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          id_command?: number | null
+          quantityMax?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carboard_id_command_fkey"
+            columns: ["id_command"]
+            isOneToOne: false
+            referencedRelation: "command"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client: {
+        Row: {
+          address: string | null
+          family_name: string | null
+          id: number
+          name: string
+          phone: number | null
+        }
+        Insert: {
+          address?: string | null
+          family_name?: string | null
+          id?: number
+          name: string
+          phone?: number | null
+        }
+        Update: {
+          address?: string | null
+          family_name?: string | null
+          id?: number
+          name?: string
+          phone?: number | null
+        }
+        Relationships: []
+      }
+      command: {
+        Row: {
+          delivery_address: string | null
+          description: string
+          id: number
+          id_client: number | null
+          list_articles: number | null
+        }
+        Insert: {
+          delivery_address?: string | null
+          description: string
+          id?: number
+          id_client?: number | null
+          list_articles?: number | null
+        }
+        Update: {
+          delivery_address?: string | null
+          description?: string
+          id?: number
+          id_client?: number | null
+          list_articles?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "command_id_client_fkey"
+            columns: ["id_client"]
+            isOneToOne: false
+            referencedRelation: "client"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "command_list_articles_fkey"
+            columns: ["list_articles"]
+            isOneToOne: false
+            referencedRelation: "article"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery: {
+        Row: {
+          description: string
+          id_command: number
+          id_delivery_man: number
+        }
+        Insert: {
+          description: string
+          id_command: number
+          id_delivery_man: number
+        }
+        Update: {
+          description?: string
+          id_command?: number
+          id_delivery_man?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "livraison_id_command_fkey"
+            columns: ["id_command"]
+            isOneToOne: false
+            referencedRelation: "command"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "livraison_id_delivery_man_fkey"
+            columns: ["id_delivery_man"]
+            isOneToOne: false
+            referencedRelation: "delivery_man"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      delivery_man: {
         Row: {
           created_at: string
-          familyname: string | null
+          family_name: string | null
           id: number
           mail: string | null
           name: string | null
@@ -20,7 +166,7 @@ export type Database = {
         }
         Insert: {
           created_at: string
-          familyname?: string | null
+          family_name?: string | null
           id?: number
           mail?: string | null
           name?: string | null
@@ -28,7 +174,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          familyname?: string | null
+          family_name?: string | null
           id?: number
           mail?: string | null
           name?: string | null
@@ -44,7 +190,17 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      article_category:
+        | "moule_rouge"
+        | "moule_bleu"
+        | "moule_noir"
+        | "papier_spécial1"
+        | "papier_spécial2"
+        | "papier_spécial3"
+        | "papier_spécial4"
+        | "papier_spécial5"
+        | "papier_spécial6"
+        | "papier_spécial7"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -159,6 +315,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      article_category: [
+        "moule_rouge",
+        "moule_bleu",
+        "moule_noir",
+        "papier_spécial1",
+        "papier_spécial2",
+        "papier_spécial3",
+        "papier_spécial4",
+        "papier_spécial5",
+        "papier_spécial6",
+        "papier_spécial7",
+      ],
+    },
   },
 } as const
