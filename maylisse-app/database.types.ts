@@ -14,23 +14,23 @@ export type Database = {
           categorie: Database["public"]["Enums"]["article_category"]
           description: string | null
           id: number
-          quantity: number | null
+          quantity: number | 0
         }
         Insert: {
           categorie: Database["public"]["Enums"]["article_category"]
           description?: string | null
           id?: number
-          quantity?: number | null
+          quantity?: number | 0
         }
         Update: {
           categorie?: Database["public"]["Enums"]["article_category"]
           description?: string | null
           id?: number
-          quantity?: number | null
+          quantity?: number | 0
         }
         Relationships: []
       }
-      carboard: {
+      cardboard: {
         Row: {
           description: string | null
           id: number
@@ -106,7 +106,7 @@ export type Database = {
             foreignKeyName: "commanded_articles_id_carboard_fkey"
             columns: ["id_carboard"]
             isOneToOne: false
-            referencedRelation: "carboard"
+            referencedRelation: "cardboard"
             referencedColumns: ["id"]
           },
           {
