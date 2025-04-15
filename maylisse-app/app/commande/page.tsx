@@ -6,7 +6,7 @@ async function Commande() {
     const supabase = await createClient();
     //const {data} = await supabase.from('deliveryman').select('*').limit(1).single();
 
-    const { data, error } = await supabase.from('command').select('*').single();
+    const { data, error } = await supabase.from('order').select('*').single();
 
 
     if (error) {

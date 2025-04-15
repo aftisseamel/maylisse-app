@@ -34,30 +34,19 @@ export type Database = {
         Row: {
           description: string | null
           id: number
-          id_command: number | null
-          quantityMax: number | null
+          size: Database["public"]["Enums"]["cardboard_category"] | null
         }
         Insert: {
           description?: string | null
           id?: number
-          id_command?: number | null
-          quantityMax?: number | null
+          size?: Database["public"]["Enums"]["cardboard_category"] | null
         }
         Update: {
           description?: string | null
           id?: number
-          id_command?: number | null
-          quantityMax?: number | null
+          size?: Database["public"]["Enums"]["cardboard_category"] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "carboard_id_command_fkey"
-            columns: ["id_command"]
-            isOneToOne: false
-            referencedRelation: "command"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       client: {
         Row: {
@@ -83,41 +72,48 @@ export type Database = {
         }
         Relationships: []
       }
-      command: {
+      commanded_articles: {
         Row: {
-          delivery_address: string | null
-          description: string
-          id: number
-          id_client: number | null
-          list_articles: number | null
+          commanded_quantity: number | null
+          description: string | null
+          id_article: number
+          id_carboard: number | null
+          id_order: number
         }
         Insert: {
-          delivery_address?: string | null
-          description: string
-          id?: number
-          id_client?: number | null
-          list_articles?: number | null
+          commanded_quantity?: number | null
+          description?: string | null
+          id_article: number
+          id_carboard?: number | null
+          id_order: number
         }
         Update: {
-          delivery_address?: string | null
-          description?: string
-          id?: number
-          id_client?: number | null
-          list_articles?: number | null
+          commanded_quantity?: number | null
+          description?: string | null
+          id_article?: number
+          id_carboard?: number | null
+          id_order?: number
         }
         Relationships: [
           {
-            foreignKeyName: "command_id_client_fkey"
-            columns: ["id_client"]
+            foreignKeyName: "articles_to_deliver_id_article_fkey"
+            columns: ["id_article"]
             isOneToOne: false
-            referencedRelation: "client"
+            referencedRelation: "article"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "command_list_articles_fkey"
-            columns: ["list_articles"]
+            foreignKeyName: "commanded_articles_id_carboard_fkey"
+            columns: ["id_carboard"]
             isOneToOne: false
-            referencedRelation: "article"
+            referencedRelation: "carboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commanded_articles_id_order_fkey"
+            columns: ["id_order"]
+            isOneToOne: false
+            referencedRelation: "order"
             referencedColumns: ["id"]
           },
         ]
@@ -125,25 +121,25 @@ export type Database = {
       delivery: {
         Row: {
           description: string
-          id_command: number
           id_delivery_man: number
+          id_order: number
         }
         Insert: {
           description: string
-          id_command: number
           id_delivery_man: number
+          id_order: number
         }
         Update: {
           description?: string
-          id_command?: number
           id_delivery_man?: number
+          id_order?: number
         }
         Relationships: [
           {
-            foreignKeyName: "livraison_id_command_fkey"
-            columns: ["id_command"]
+            foreignKeyName: "delivery_id_order_fkey"
+            columns: ["id_order"]
             isOneToOne: false
-            referencedRelation: "command"
+            referencedRelation: "order"
             referencedColumns: ["id"]
           },
           {
@@ -182,6 +178,35 @@ export type Database = {
         }
         Relationships: []
       }
+      order: {
+        Row: {
+          delivery_address: string | null
+          description: string
+          id: number
+          id_client: number | null
+        }
+        Insert: {
+          delivery_address?: string | null
+          description: string
+          id?: number
+          id_client?: number | null
+        }
+        Update: {
+          delivery_address?: string | null
+          description?: string
+          id?: number
+          id_client?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "command_id_client_fkey"
+            columns: ["id_client"]
+            isOneToOne: false
+            referencedRelation: "client"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -201,6 +226,7 @@ export type Database = {
         | "papier_spécial5"
         | "papier_spécial6"
         | "papier_spécial7"
+      cardboard_category: "S" | "M" | "L" | "XL"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -328,6 +354,7 @@ export const Constants = {
         "papier_spécial6",
         "papier_spécial7",
       ],
+      cardboard_category: ["S", "M", "L", "XL"],
     },
   },
 } as const
