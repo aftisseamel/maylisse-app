@@ -212,7 +212,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      sum_quantity_above: {
+        Args: { val: number }
+        Returns: number
+      }
     }
     Enums: {
       article_category:
