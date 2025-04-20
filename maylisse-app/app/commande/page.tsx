@@ -1,25 +1,20 @@
-import { createClient } from "@/utils/supabase/server";
 
+import data_articles from "@/data_articles";
 
 async function Commande() {
 
-    const supabase = await createClient();
-
-    const {data, error} = await supabase.from('article').select('*').eq('name', 'moule_bleu')
-    
-    if (error) {
-    console.error("Erreur Supabase:", error)
-    } else {
-    console.log("Data reçue: ", data)
-    }
-
+    const articles = await data_articles();
     return (
-        <div>
-            <h1>Articles</h1>
-            <p>Voici les articles</p>
-            <p>{JSON.stringify(data)}</p>
-        </div>
-    )
+        <div> 
+            <h1> Articles : </h1>
+            <ul>
+                {articles.map((name, index) => (
+                <li key={index}>{name}</li>
+                ))}
+            </ul>
+         </div>
+           
+    );
 }
 
 export default Commande;

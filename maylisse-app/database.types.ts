@@ -11,22 +11,22 @@ export type Database = {
     Tables: {
       article: {
         Row: {
-          categorie: Database["public"]["Enums"]["article_category"]
           description: string | null
           id: number
-          quantity: number | 0
+          name: Database["public"]["Enums"]["article_category"]
+          quantity: number | null
         }
         Insert: {
-          categorie: Database["public"]["Enums"]["article_category"]
           description?: string | null
           id?: number
-          quantity?: number | 0
+          name: Database["public"]["Enums"]["article_category"]
+          quantity?: number | null
         }
         Update: {
-          categorie?: Database["public"]["Enums"]["article_category"]
           description?: string | null
           id?: number
-          quantity?: number | 0
+          name?: Database["public"]["Enums"]["article_category"]
+          quantity?: number | null
         }
         Relationships: []
       }
@@ -212,10 +212,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      sum_quantity_above: {
-        Args: { val: number }
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       article_category:
