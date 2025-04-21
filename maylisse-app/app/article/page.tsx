@@ -10,7 +10,7 @@ async function Article() {
         <div> 
             <h1> Articles : </h1>
             
-            {articles}
+            {JSON.stringify(articles)}
            
          </div>
            

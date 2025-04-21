@@ -1,19 +1,21 @@
 "use client";
-import React, { useState } from "react";
+
+import { Tables } from "@/database.types";
+import React, { ChangeEvent, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 
-const SearchBar = () => {
-    const articles = ["moule_bleu", "moule_rouge", "papier_spécial5","papier_spécial4","papier_spécial3"];
+const SearchBar =  ({articles}:{articles : Tables<"article"> []}) => {
 
-    const [activeSearch, setActiveSearch] = useState([]);
-    const handleSearch = (e) => {
+
+    const [activeSearch, setActiveSearch] = useState<Tables<"article"> []>([]);
+    const handleSearch = (e : ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value.trim().toLowerCase();
         if (query === "") {
             setActiveSearch([]);
             return;
         }
         setActiveSearch(
-            articles.filter((article) => article.toLowerCase().includes(query)).slice(0, 8)
+            articles.filter((article) => article.name.toLowerCase().includes(query)).slice(0, 8)
         );
     };
 
@@ -35,9 +37,12 @@ const SearchBar = () => {
             </div>
 
             {activeSearch.length > 0 && (
-                <div className="absolute top-20 p-4 bg-slate-700 text-white w-fit rounded-xl left-15 -translate-x-1/2 flex flex-col gap-2">
+                <div className="absolute top-20 p-4 bg-slate-700 text-white w-fit rounded-xl left-1/2 -translate-x-1/2 flex flex-col gap-2">
                     {activeSearch.map((article, index) => (
-                        <span key={index}>{article}</span>
+                        <div key={index} className="flex flex-col gap-2"> 
+                        <span >{article.name} QUANTITY {article.quantity}</span>
+                        <span >{}</span>
+                        </div>
                     ))}
                 </div>
             )}
