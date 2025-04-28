@@ -6,7 +6,6 @@ async function Commande() {
             <h1> Commandes : </h1>
             <p> Voici les commandes </p>
             
-
          </div>
            
     );
