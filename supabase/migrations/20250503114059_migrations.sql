@@ -1,6 +1,36 @@
+
+-- Create a table for public profiles
+create type role_profile as enum (
+  'admin',
+  'delivery_man'
+);
+
+create table profiles (
+  role_profile role_profile not null default 'delivery_man',
+  id uuid references auth.users on delete cascade not null primary key
+);
+
+
+-- This trigger automatically creates a profile entry when a new user signs up via Supabase Auth.
+-- See https://supabase.com/docs/guides/auth/managing-user-data#using-triggers for more details.
+create function public.handle_new_user()
+returns trigger
+set search_path = ''
+as $$
+begin
+  insert into public.profiles (id)
+  values (new.id);
+  return new;
+end;
+$$ language plpgsql security definer;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+
 create table article (
     id serial primary key,
-    name varchar(255) not null,
+    name varchar(255) not null unique,
     price numeric(18, 2) not null,
     quantity integer not null default 0,
     description text,
@@ -62,3 +92,4 @@ create table order_article (
     primary key (id_order, id_article)
 
 );
+

@@ -11,139 +11,138 @@ export type Database = {
     Tables: {
       article: {
         Row: {
+          created_at: string | null
           description: string | null
           id: number
-          name: Database["public"]["Enums"]["article_category"]
-          quantity: number | null
+          image_url: string | null
+          name: string
+          price: number
+          quantity: number
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           description?: string | null
           id?: number
-          name: Database["public"]["Enums"]["article_category"]
-          quantity?: number | null
+          image_url?: string | null
+          name: string
+          price: number
+          quantity?: number
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           description?: string | null
           id?: number
-          name?: Database["public"]["Enums"]["article_category"]
-          quantity?: number | null
-        }
-        Relationships: []
-      }
-      cardboard: {
-        Row: {
-          description: string | null
-          id: number
-          size: Database["public"]["Enums"]["cardboard_category"] | null
-        }
-        Insert: {
-          description?: string | null
-          id?: number
-          size?: Database["public"]["Enums"]["cardboard_category"] | null
-        }
-        Update: {
-          description?: string | null
-          id?: number
-          size?: Database["public"]["Enums"]["cardboard_category"] | null
+          image_url?: string | null
+          name?: string
+          price?: number
+          quantity?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
       client: {
         Row: {
           address: string | null
-          family_name: string | null
+          created_at: string | null
+          email: string
           id: number
           name: string
-          phone: number | null
+          phone: string | null
+          updated_at: string | null
         }
         Insert: {
           address?: string | null
-          family_name?: string | null
+          created_at?: string | null
+          email: string
           id?: number
           name: string
-          phone?: number | null
+          phone?: string | null
+          updated_at?: string | null
         }
         Update: {
           address?: string | null
-          family_name?: string | null
+          created_at?: string | null
+          email?: string
           id?: number
           name?: string
-          phone?: number | null
+          phone?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
-      commanded_articles: {
+      delivery_man: {
         Row: {
-          commanded_quantity: number | null
-          description: string | null
-          id_article: number
-          id_carboard: number | null
-          id_order: number
+          address: string | null
+          created_at: string | null
+          email: string
+          first_name: string
+          id: number
+          last_name: string
+          phone: string | null
+          updated_at: string | null
         }
         Insert: {
-          commanded_quantity?: number | null
-          description?: string | null
-          id_article: number
-          id_carboard?: number | null
-          id_order: number
+          address?: string | null
+          created_at?: string | null
+          email: string
+          first_name: string
+          id?: number
+          last_name: string
+          phone?: string | null
+          updated_at?: string | null
         }
         Update: {
-          commanded_quantity?: number | null
-          description?: string | null
-          id_article?: number
-          id_carboard?: number | null
-          id_order?: number
+          address?: string | null
+          created_at?: string | null
+          email?: string
+          first_name?: string
+          id?: number
+          last_name?: string
+          phone?: string | null
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "articles_to_deliver_id_article_fkey"
-            columns: ["id_article"]
-            isOneToOne: false
-            referencedRelation: "article"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "commanded_articles_id_carboard_fkey"
-            columns: ["id_carboard"]
-            isOneToOne: false
-            referencedRelation: "cardboard"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "commanded_articles_id_order_fkey"
-            columns: ["id_order"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      delivery: {
+      order: {
         Row: {
-          description: string
-          id_delivery_man: number
-          id_order: number
+          created_at: string | null
+          delivery_address: string
+          id: number
+          id_client: number | null
+          id_delivery_man: number | null
+          status: Database["public"]["Enums"]["order_status"]
+          updated_at: string | null
         }
         Insert: {
-          description: string
-          id_delivery_man: number
-          id_order: number
+          created_at?: string | null
+          delivery_address: string
+          id?: number
+          id_client?: number | null
+          id_delivery_man?: number | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string | null
         }
         Update: {
-          description?: string
-          id_delivery_man?: number
-          id_order?: number
+          created_at?: string | null
+          delivery_address?: string
+          id?: number
+          id_client?: number | null
+          id_delivery_man?: number | null
+          status?: Database["public"]["Enums"]["order_status"]
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "delivery_id_order_fkey"
-            columns: ["id_order"]
+            foreignKeyName: "order_id_client_fkey"
+            columns: ["id_client"]
             isOneToOne: false
-            referencedRelation: "order"
+            referencedRelation: "client"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "livraison_id_delivery_man_fkey"
+            foreignKeyName: "order_id_delivery_man_fkey"
             columns: ["id_delivery_man"]
             isOneToOne: false
             referencedRelation: "delivery_man"
@@ -151,61 +150,62 @@ export type Database = {
           },
         ]
       }
-      delivery_man: {
+      order_article: {
         Row: {
-          created_at: string
-          family_name: string | null
-          id: number
-          mail: string | null
-          name: string | null
-          phone_number: number | null
+          created_at: string | null
+          id_article: number
+          id_order: number
+          price: number
+          quantity: number
+          updated_at: string | null
         }
         Insert: {
-          created_at: string
-          family_name?: string | null
-          id?: number
-          mail?: string | null
-          name?: string | null
-          phone_number?: number | null
+          created_at?: string | null
+          id_article: number
+          id_order: number
+          price?: number
+          quantity?: number
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
-          family_name?: string | null
-          id?: number
-          mail?: string | null
-          name?: string | null
-          phone_number?: number | null
-        }
-        Relationships: []
-      }
-      order: {
-        Row: {
-          delivery_address: string | null
-          description: string
-          id: number
-          id_client: number | null
-        }
-        Insert: {
-          delivery_address?: string | null
-          description: string
-          id?: number
-          id_client?: number | null
-        }
-        Update: {
-          delivery_address?: string | null
-          description?: string
-          id?: number
-          id_client?: number | null
+          created_at?: string | null
+          id_article?: number
+          id_order?: number
+          price?: number
+          quantity?: number
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "command_id_client_fkey"
-            columns: ["id_client"]
+            foreignKeyName: "order_article_id_article_fkey"
+            columns: ["id_article"]
             isOneToOne: false
-            referencedRelation: "client"
+            referencedRelation: "article"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_article_id_order_fkey"
+            columns: ["id_order"]
+            isOneToOne: false
+            referencedRelation: "order"
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          id: string
+          role_profile: Database["public"]["Enums"]["role_profile"]
+        }
+        Insert: {
+          id: string
+          role_profile?: Database["public"]["Enums"]["role_profile"]
+        }
+        Update: {
+          id?: string
+          role_profile?: Database["public"]["Enums"]["role_profile"]
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -215,18 +215,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      article_category:
-        | "moule_rouge"
-        | "moule_bleu"
-        | "moule_noir"
-        | "papier_spécial1"
-        | "papier_spécial2"
-        | "papier_spécial3"
-        | "papier_spécial4"
-        | "papier_spécial5"
-        | "papier_spécial6"
-        | "papier_spécial7"
-      cardboard_category: "S" | "M" | "L" | "XL"
+      order_status:
+        | "initiated"
+        | "preparation"
+        | "prepared"
+        | "delivering"
+        | "delivered"
+        | "finished"
+      role_profile: "admin" | "delivery_man"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -342,19 +338,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      article_category: [
-        "moule_rouge",
-        "moule_bleu",
-        "moule_noir",
-        "papier_spécial1",
-        "papier_spécial2",
-        "papier_spécial3",
-        "papier_spécial4",
-        "papier_spécial5",
-        "papier_spécial6",
-        "papier_spécial7",
+      order_status: [
+        "initiated",
+        "preparation",
+        "prepared",
+        "delivering",
+        "delivered",
+        "finished",
       ],
-      cardboard_category: ["S", "M", "L", "XL"],
+      role_profile: ["admin", "delivery_man"],
     },
   },
 } as const
