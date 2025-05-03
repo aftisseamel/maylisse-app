@@ -81,6 +81,7 @@ export type Database = {
           id: number
           last_name: string
           phone: string | null
+          pseudo: string
           updated_at: string | null
         }
         Insert: {
@@ -91,6 +92,7 @@ export type Database = {
           id?: number
           last_name: string
           phone?: string | null
+          pseudo: string
           updated_at?: string | null
         }
         Update: {
@@ -101,6 +103,7 @@ export type Database = {
           id?: number
           last_name?: string
           phone?: string | null
+          pseudo?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -110,8 +113,8 @@ export type Database = {
           created_at: string | null
           delivery_address: string
           id: number
-          id_client: number | null
-          id_delivery_man: number | null
+          name_client: string
+          pseudo: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string | null
         }
@@ -119,8 +122,8 @@ export type Database = {
           created_at?: string | null
           delivery_address: string
           id?: number
-          id_client?: number | null
-          id_delivery_man?: number | null
+          name_client: string
+          pseudo?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string | null
         }
@@ -128,25 +131,25 @@ export type Database = {
           created_at?: string | null
           delivery_address?: string
           id?: number
-          id_client?: number | null
-          id_delivery_man?: number | null
+          name_client?: string
+          pseudo?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "order_id_client_fkey"
-            columns: ["id_client"]
+            foreignKeyName: "order_name_client_fkey"
+            columns: ["name_client"]
             isOneToOne: false
             referencedRelation: "client"
-            referencedColumns: ["id"]
+            referencedColumns: ["name"]
           },
           {
-            foreignKeyName: "order_id_delivery_man_fkey"
-            columns: ["id_delivery_man"]
+            foreignKeyName: "order_pseudo_fkey"
+            columns: ["pseudo"]
             isOneToOne: false
             referencedRelation: "delivery_man"
-            referencedColumns: ["id"]
+            referencedColumns: ["pseudo"]
           },
         ]
       }

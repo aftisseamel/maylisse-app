@@ -41,7 +41,7 @@ create table article (
 
 create table client (
     id serial primary key,
-    name varchar(255) not null,
+    name varchar(255) not null unique,
     email varchar(255) not null,
     phone varchar(20),
     address text,
@@ -51,6 +51,7 @@ create table client (
 
 create table delivery_man (
     id serial primary key,
+    pseudo varchar(255) not null unique,
     first_name varchar(255) not null,
     last_name varchar(255) not null,
     email varchar(255) not null,
@@ -72,12 +73,12 @@ create type order_status as enum (
 
 create table "order" (
     id serial primary key,
-    id_client integer references client(id) on delete set null,
     status order_status not null default 'initiated',
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now(),
     delivery_address text not null,
-    id_delivery_man integer references delivery_man(id) on delete set null
+    pseudo varchar(255) references delivery_man(pseudo) on delete set null,
+    name_client varchar(255) not null references client(name) on delete set null
 );
 
 

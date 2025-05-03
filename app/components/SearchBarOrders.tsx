@@ -15,7 +15,7 @@ const SearchBar = ({ orders }: { orders: Tables<"order">[] }) => {
     }
     setActiveSearch(
       orders
-        .filter((order) => order.id.toString().includes(query))
+        .filter((order) => order.name_client.toString().includes(query))
         .slice(0, 8)
     );
   };
@@ -26,7 +26,7 @@ const SearchBar = ({ orders }: { orders: Tables<"order">[] }) => {
       <div className="relative">
         <input
           type="search"
-          placeholder="Rechercher un article..."
+          placeholder="Rechercher une commande..."
           className="w-full px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
           onChange={handleSearch}
         />
@@ -50,7 +50,7 @@ const SearchBar = ({ orders }: { orders: Tables<"order">[] }) => {
 
               {/* Infos */}
               <div className="flex flex-col">
-                <span className="font-semibold text-gray-800">{order.id_client}</span>
+                <span className="font-semibold text-gray-800">{order.name_client}</span>
                 <span className="text-sm text-gray-500">
                   adressse :  {order.delivery_address} status: {order.status}
                 </span>
