@@ -47,7 +47,6 @@ const SearchBar = ({ clients }: { clients: Tables<"client">[] }) => {
               className="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all"
             >
               
-
               {/* Infos */}
               <div className="flex flex-col">
                 <span className="font-semibold text-gray-800">{client.name}</span>
