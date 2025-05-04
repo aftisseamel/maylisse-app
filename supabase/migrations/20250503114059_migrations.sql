@@ -67,7 +67,8 @@ create type order_status as enum (
     'prepared',
     'delivering',
     'delivered',
-    'finished'
+    'finished',
+    'canceled'
 );
 
 
@@ -78,7 +79,8 @@ create table "order" (
     updated_at timestamp with time zone default now(),
     delivery_address text not null,
     pseudo varchar(255) references delivery_man(pseudo) on delete set null,
-    name_client varchar(255) not null references client(name) on delete set null
+    name_client varchar(255) not null references client(name) on delete set null,
+    description_order text not null
 );
 
 

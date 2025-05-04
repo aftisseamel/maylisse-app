@@ -1,4 +1,4 @@
-'use client'; // 👈 Obligatoire pour le client side
+'use client'; // le client side
 
 import { redirect } from 'next/navigation';
 import { createArticle } from './action';
@@ -13,13 +13,13 @@ export default function Create_article() {
 
     startTransition(async () => {
       await createArticle(formData);
-      redirect('/admins');
+      redirect('/admin');
     });
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
-      <h1 className="text-2xl font-bold text-center mb-6">📝 Créer un article</h1>
+      <h1 className="text-2xl font-bold text-center mb-6"> Créer un article </h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input name="name" placeholder="Nom de l'article" required />

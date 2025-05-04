@@ -6,16 +6,35 @@ export default async function Page() {
 
   return (
 
-    <div> 
-      <h1> WELCOME to the admin page</h1>
-      
-      <Link href={"/test"}
-        className="bg-blue-500 text-white p-10 rounded" >
+  <div className="flex  items-center gap-6 mt-10">
+  <Link
+    href="./create_article"
+    className="bg-blue-500 hover:bg-blue-600 text-white p-10 rounded-lg shadow-md transition-all duration-300"
+  >
+    Créer un article
+  </Link>
 
-        créer un article 
+  <Link
+    href="/create_client"
+    className="bg-blue-500 hover:bg-blue-600 text-white p-10 rounded-lg shadow-md transition-all duration-300"
+  >
+    Créer un client
+  </Link>
 
-      </Link>
+  <Link
+    href="/create_delivery_man"
+    className="bg-blue-500 hover:bg-blue-600 text-white p-10 rounded-lg shadow-md transition-all duration-300"
+  >
+    Créer un livreur 
+  </Link>
 
-    </div>
+  <Link
+    href="/create_order"
+    className="bg-blue-500 hover:bg-blue-600 text-white p-10 rounded-lg shadow-md transition-all duration-300"
+  >
+    Créer commande
+  </Link>
+
+</div>
   )
 }

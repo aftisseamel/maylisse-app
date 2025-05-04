@@ -25,7 +25,7 @@ export async function createArticle(formData: FormData) {
     if (error) {
         redirect('/error')
     } else {
-        //revalidatePath('/private')
+        revalidatePath('/private')
         redirect('/article')
     }
 }
