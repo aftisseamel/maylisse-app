@@ -24,17 +24,22 @@ export default function Create_order() {
             <Input name="delivery_address" placeholder="adresse de livraison" required />
             <Input name="pseudo" placeholder="pseudo du livreur" required />
             <Input name="name_client" placeholder="nom du client" required />
+            <Input name="description commande" placeholder="description de la commande" required />
             <select
                 name="status" 
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                 required
+                defaultValue=""
             >   
-                <option value="" disabled selected>Choisir status</option>
+                <option value="" disabled>Choisir status</option>
                 <option value="initiated">initiated</option>
                 <option value="preparation">preparation</option>
                 <option value="prepared">prepared</option>
                 <option value="delivering">delivering</option>
+                <option value="delivered">delivering</option>
                 <option value="finished">finished</option>
+                <option value="canceled">delivering</option>
+
 
               </select>
 

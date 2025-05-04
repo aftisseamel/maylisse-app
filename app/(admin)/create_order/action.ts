@@ -22,12 +22,9 @@ export async function createOrder(formData: FormData){
     console.log('error', error)
     if (error) {
         console.log("error", error)
-        redirect('/error')
+        redirect('/errorCreateOrder')
     }
     else {
         redirect('/order')
-
-       
-
     }
 }
