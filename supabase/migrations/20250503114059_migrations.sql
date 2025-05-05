@@ -44,19 +44,19 @@ create table client (
     name varchar(255) not null unique,
     email varchar(255) not null,
     phone varchar(20),
-    address text,
+    address_client text,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now()                
 );
 
 create table delivery_man (
     id serial primary key,
-    pseudo varchar(255) not null unique,
+    pseudo_delivery_man varchar(255) not null unique,
     first_name varchar(255) not null,
     last_name varchar(255) not null,
     email varchar(255) not null,
     phone varchar(20),
-    address text,
+    address_delivery_man text,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now()                
 );
@@ -78,7 +78,7 @@ create table "order" (
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now(),
     delivery_address text not null,
-    pseudo varchar(255) references delivery_man(pseudo) on delete set null,
+    pseudo_delivery_man varchar(255) references delivery_man(pseudo_delivery_man) on delete set null,
     name_client varchar(255) not null references client(name) on delete set null,
     description_order text not null
 );
