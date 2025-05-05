@@ -2,7 +2,7 @@
 import { useTransition } from "react";
 import { redirect } from "next/navigation";
 import { createOrder } from "./action";
-
+import Link from "next/link";
 
 export default function Create_order() {
 
@@ -39,8 +39,6 @@ export default function Create_order() {
                 <option value="delivered">delivering</option>
                 <option value="finished">finished</option>
                 <option value="canceled">delivering</option>
-
-
               </select>
 
             <button
@@ -53,10 +51,13 @@ export default function Create_order() {
           {isPending ? 'Création...' : 'Créer'}
         </button>
         </form>
+
+        <Link href="/ajuster_la_commande" className="text-indigo-600 hover:underline mt-4 block text-center">
+          ajouter les articles et prix à la commande        
+        </Link>
+        
         </div>
     )
-
-    
 }
 
 function Input({ name, type = 'text', placeholder, required = false }: { name: string; type?: string; placeholder: string; required?: boolean }) {
