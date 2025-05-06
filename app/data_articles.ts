@@ -11,12 +11,9 @@ const data_articles = async () : Promise<Tables<"article"> []>  => {
         console.error("Error fetching articles:", error);
         return [];
     } else {
-        console.log(data)
+        //console.log(data)
     }
-    //const mapData = data.map((item: { name : string, quantity: number | null, description: string | null}) => [item.name, item.quantity]);
-
-    //console.log("le type de map data c'est ", (mapData))
-
+  
     return data
 }
 export default data_articles;

@@ -5,24 +5,28 @@ import React, { ChangeEvent, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 
 const SearchBar = ({ 
-  articles, 
+  deliveryMen, 
   onSearchResults 
 }: { 
-  articles: Tables<"article">[];
-  onSearchResults?: (results: Tables<"article">[]) => void;
+  deliveryMen: Tables<"delivery_man">[];
+  onSearchResults?: (results: Tables<"delivery_man">[]) => void;
 }) => {
-  const [activeSearch, setActiveSearch] = useState<Tables<"article">[]>([]);
+  const [activeSearch, setActiveSearch] = useState<Tables<"delivery_man">[]>([]);
 
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.trim().toLowerCase();
     if (query === "") {
-      const results = articles;
+      const results = deliveryMen;
       setActiveSearch([]);
       onSearchResults?.(results);
       return;
     }
-    const results = articles
-      .filter((article) => article.name.toLowerCase().includes(query))
+    const results = deliveryMen
+      .filter((deliveryMan) => 
+        deliveryMan.pseudo_delivery_man.toLowerCase().includes(query) ||
+        deliveryMan.first_name.toLowerCase().includes(query) ||
+        deliveryMan.last_name.toLowerCase().includes(query)
+      )
       .slice(0, 8);
     setActiveSearch(results);
     onSearchResults?.(results);
@@ -34,7 +38,7 @@ const SearchBar = ({
       <div className="relative">
         <input
           type="search"
-          placeholder="Rechercher un article..."
+          placeholder="Rechercher un livreur..."
           className="w-full px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
           onChange={handleSearch}
         />
@@ -49,16 +53,16 @@ const SearchBar = ({
       {/* Résultats */}
       {!onSearchResults && activeSearch.length > 0 && (
         <div className="absolute top-16 w-full bg-white rounded-2xl shadow-lg p-4 mt-2 flex flex-col gap-4 z-10">
-          {activeSearch.map((article, index) => (
+          {activeSearch.map((deliveryMan, index) => (
             <div
               key={index}
               className="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all"
             >
               {/* Infos */}
               <div className="flex flex-col">
-                <span className="font-semibold text-gray-800">{article.name}</span>
+                <span className="font-semibold text-gray-800">{deliveryMan.pseudo_delivery_man}</span>
                 <span className="text-sm text-gray-500">
-                  Prix: {article.price}€ | Quantité: {article.quantity}
+                  {deliveryMan.first_name} {deliveryMan.last_name}
                 </span>
               </div>
             </div>
@@ -69,4 +73,4 @@ const SearchBar = ({
   );
 };
 
-export default SearchBar;
+export default SearchBar; 

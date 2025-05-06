@@ -44,7 +44,7 @@ export type Database = {
       }
       client: {
         Row: {
-          address: string | null
+          address_client: string | null
           created_at: string | null
           email: string
           id: number
@@ -53,7 +53,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          address?: string | null
+          address_client?: string | null
           created_at?: string | null
           email: string
           id?: number
@@ -62,7 +62,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          address?: string | null
+          address_client?: string | null
           created_at?: string | null
           email?: string
           id?: number
@@ -74,36 +74,36 @@ export type Database = {
       }
       delivery_man: {
         Row: {
-          address: string | null
+          address_delivery_man: string | null
           created_at: string | null
           email: string
           first_name: string
           id: number
           last_name: string
           phone: string | null
-          pseudo: string
+          pseudo_delivery_man: string
           updated_at: string | null
         }
         Insert: {
-          address?: string | null
+          address_delivery_man?: string | null
           created_at?: string | null
           email: string
           first_name: string
           id?: number
           last_name: string
           phone?: string | null
-          pseudo: string
+          pseudo_delivery_man: string
           updated_at?: string | null
         }
         Update: {
-          address?: string | null
+          address_delivery_man?: string | null
           created_at?: string | null
           email?: string
           first_name?: string
           id?: number
           last_name?: string
           phone?: string | null
-          pseudo?: string
+          pseudo_delivery_man?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -112,27 +112,30 @@ export type Database = {
         Row: {
           created_at: string | null
           delivery_address: string
+          description_order: string
           id: number
           name_client: string
-          pseudo: string | null
+          pseudo_delivery_man: string | null
           status: Database["public"]["Enums"]["order_status"]
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           delivery_address: string
+          description_order: string
           id?: number
           name_client: string
-          pseudo?: string | null
+          pseudo_delivery_man?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           delivery_address?: string
+          description_order?: string
           id?: number
           name_client?: string
-          pseudo?: string | null
+          pseudo_delivery_man?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           updated_at?: string | null
         }
@@ -145,11 +148,11 @@ export type Database = {
             referencedColumns: ["name"]
           },
           {
-            foreignKeyName: "order_pseudo_fkey"
-            columns: ["pseudo"]
+            foreignKeyName: "order_pseudo_delivery_man_fkey"
+            columns: ["pseudo_delivery_man"]
             isOneToOne: false
             referencedRelation: "delivery_man"
-            referencedColumns: ["pseudo"]
+            referencedColumns: ["pseudo_delivery_man"]
           },
         ]
       }
@@ -225,6 +228,7 @@ export type Database = {
         | "delivering"
         | "delivered"
         | "finished"
+        | "canceled"
       role_profile: "admin" | "delivery_man"
     }
     CompositeTypes: {
@@ -348,6 +352,7 @@ export const Constants = {
         "delivering",
         "delivered",
         "finished",
+        "canceled",
       ],
       role_profile: ["admin", "delivery_man"],
     },

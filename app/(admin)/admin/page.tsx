@@ -34,6 +34,13 @@ export default async function Page() {
   >
     Créer commande
   </Link>
+  
+  <Link
+    href="/searchEverything"
+    className="bg-indigo-500 hover:bg-indigo-600 text-white p-10 rounded-lg shadow-md transition-all duration-300"
+  >
+    Recherche Globale
+  </Link>
 
 </div>
   )
