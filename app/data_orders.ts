@@ -4,21 +4,24 @@ import { createClient } from "@/utils/supabase/server";
 import { Tables } from "@/database.types";
 import { redirect } from "next/navigation";
 
+export async function data_orders() {
+    try {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from('order')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-const data_orders = async () : Promise<Tables<"order"> []>  => {
-    const supabase = await createClient();
+        if (error) {
+            console.error('Error fetching orders:', error);
+            return [];
+        }
 
-    const { data, error } = await supabase.from('order').select();
-
-    if (error) {
-        console.error("Error fetching orders:", error);
+        return data || [];
+    } catch (error) {
+        console.error('Error in data_orders:', error);
         return [];
-    } else {
-        console.log(data)
     }
-   
-
-    return data
 }
 
 export default data_orders;

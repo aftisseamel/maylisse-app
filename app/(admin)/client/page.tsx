@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
 export default function Page() {
+  const router = useRouter();
   const [clients, setClients] = useState<Tables<"client">[]>([]);
   const [filteredClients, setFilteredClients] = useState<Tables<"client">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,6 +85,14 @@ export default function Page() {
                     <span className="font-medium">Adresse:</span> {client.address_client}
                   </p>
                 )}
+                <button 
+                type="button"
+                onClick={() => {
+                  router.push(`/clientID/${client.name}`);
+                }}
+                >
+                  Voir les commandes
+                </button>
               </div>
             </div>
           ))}

@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
-import { createClient } from '@/utils/supabase/client';
 import SearchBarOrders from "../../components/SearchBarOrders";
+import { data_orders } from '@/app/data_orders';
 
 export default function Page() {
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
@@ -15,15 +15,9 @@ export default function Page() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const supabase = createClient();
-                const { data, error } = await supabase
-                    .from('order')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                setOrders(data || []);
-                setFilteredOrders(data || []);
+                const data = await data_orders();
+                setOrders(data);
+                setFilteredOrders(data);
             } catch (err) {
                 console.error('Error:', err);
             } finally {
