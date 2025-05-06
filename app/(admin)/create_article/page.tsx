@@ -26,7 +26,6 @@ export default function Create_article() {
         <Input name="price" type="number" placeholder="Prix (€)" required />
         <Input name="quantity" type="number" placeholder="Quantité" required />
         <Input name="description" placeholder="Description" required />
-        <Input name="image_url" placeholder="URL de l’image" />
 
         <button
           type="submit"

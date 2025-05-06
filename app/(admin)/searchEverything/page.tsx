@@ -15,10 +15,10 @@ export default function SearchEverything() {
   const [deliveryMen, setDeliveryMen] = useState<Tables<"delivery_man">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Charger toutes les données au démarrage
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setIsLoading(true);
         const supabase = createClient();
 
         // Récupérer les articles
@@ -38,7 +38,7 @@ export default function SearchEverything() {
         if (deliveryMenData) setDeliveryMen(deliveryMenData);
 
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('Error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -48,41 +48,37 @@ export default function SearchEverything() {
   }, []);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <div>Chargement...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+    <div className="p-4">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-center mb-6">
           Recherche Globale
         </h1>
 
         {/* Section Articles */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Rechercher un article</h2>
-          <SearchBar articles={articles} />
+        <div className="bg-white p-4 rounded-lg shadow mb-4">
+          <h2 className="text-lg font-semibold mb-3">Rechercher un article</h2>
+          <SearchBar articles={articles} onSearchResults={() => {}} />
         </div>
 
         {/* Section Clients */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Rechercher un client</h2>
+        <div className="bg-white p-4 rounded-lg shadow mb-4">
+          <h2 className="text-lg font-semibold mb-3">Rechercher un client</h2>
           <SearchBarClients clients={clients} />
         </div>
 
         {/* Section Commandes */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Rechercher une commande</h2>
+        <div className="bg-white p-4 rounded-lg shadow mb-4">
+          <h2 className="text-lg font-semibold mb-3">Rechercher une commande</h2>
           <SearchBarOrders orders={orders} />
         </div>
 
         {/* Section Livreurs */}
-        <div className="bg-white p-6 rounded-xl shadow-lg">
-          <h2 className="text-xl font-semibold mb-4">Rechercher un livreur</h2>
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-3">Rechercher un livreur</h2>
           <SearchBarDeliveryMan deliveryMen={deliveryMen} />
         </div>
       </div>

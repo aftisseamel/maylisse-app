@@ -5,98 +5,159 @@ import { Tables } from '@/database.types';
 import Link from 'next/link';
 import SearchBar from "../../components/SearchBarArticles";
 import data_articles from "../../data_articles";
+import { createClient } from '@/utils/supabase/client';
 
 export default function Page() {
   const [articles, setArticles] = useState<Tables<"article">[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [quantityChanges, setQuantityChanges] = useState<{ [key: number]: number }>({});
 
+  // Charger les articles au démarrage
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        setIsLoading(true);
         const data = await data_articles();
         setArticles(data);
         setFilteredArticles(data);
       } catch (err) {
-        console.error('Error fetching articles:', err);
+        console.error('Error:', err);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchArticles();
   }, []);
 
+  // Mettre à jour les articles filtrés quand on recherche
   const handleSearchResults = (results: Tables<"article">[]) => {
     setFilteredArticles(results);
   };
 
+  // Modifier la quantité d'un article
+  const updateQuantity = async (articleId: number, change: number) => {
+    const currentQuantity = articles.find(a => a.id === articleId)?.quantity || 0;
+    const newQuantity = currentQuantity + change;
+    
+    if (newQuantity < 0) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('article')
+        .update({ quantity: newQuantity })
+        .eq('id', articleId);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      setArticles(articles.map(article => 
+        article.id === articleId ? { ...article, quantity: newQuantity } : article
+      ));
+      setFilteredArticles(filteredArticles.map(article => 
+        article.id === articleId ? { ...article, quantity: newQuantity } : article
+      ));
+    } catch (err) {
+      console.error('Error updating quantity:', err);
+    }
+  };
+
+  // Réinitialiser la quantité d'un article à 0
+  const resetQuantity = async (articleId: number) => {
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('article')
+        .update({ quantity: 0 })
+        .eq('id', articleId);
+
+      if (error) throw error;
+
+      // Mettre à jour l'état local
+      setArticles(articles.map(article => 
+        article.id === articleId ? { ...article, quantity: 0 } : article
+      ));
+      setFilteredArticles(filteredArticles.map(article => 
+        article.id === articleId ? { ...article, quantity: 0 } : article
+      ));
+    } catch (err) {
+      console.error('Error resetting quantity:', err);
+    }
+  };
+
+  // Gérer le changement de valeur dans l'input
+  const handleQuantityChange = (articleId: number, value: string) => {
+    const numValue = parseInt(value) || 0;
+    setQuantityChanges(prev => ({
+      ...prev,
+      [articleId]: numValue
+    }));
+  };
+
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <div>Chargement...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header avec titre et barre de recherche */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-          <h1 className="text-4xl font-extrabold text-gray-800 mb-4 md:mb-0">
-            Articles
-          </h1>
-          <div className="w-full md:w-96">
+    <div className="p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* En-tête avec titre et recherche */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold">Articles</h1>
+          <div className="w-full md:w-80">
             <SearchBar articles={articles} onSearchResults={handleSearchResults} />
           </div>
         </div>
 
-        {/* Grille d'articles */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {/* Liste des articles */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredArticles.map((article) => (
-            <div
-              key={article.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-            >
-              {article.image_url && (
-                <div className="aspect-square w-full overflow-hidden">
-                  <img
-                    src={article.image_url}
-                    alt={article.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{article.name}</h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p className="font-medium text-indigo-600">{article.price}€</p>
-                  <p>Quantité: {article.quantity}</p>
-                  {article.description && (
-                    <p className="line-clamp-2">{article.description}</p>
-                  )}
-                </div>
+            <div key={article.id} className="bg-white p-4 rounded-lg shadow">
+              <h3 className="font-bold">{article.name}</h3>
+              <p className="text-indigo-600">{article.price}€</p>
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  onClick={() => updateQuantity(article.id, -(quantityChanges[article.id] || 0))}
+                  className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  value={quantityChanges[article.id] || 0}
+                  onChange={(e) => handleQuantityChange(article.id, e.target.value)}
+                  className="w-16 px-2 py-1 border rounded text-center"
+                />
+                <button
+                  onClick={() => updateQuantity(article.id, quantityChanges[article.id] || 0)}
+                  className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
+                >
+                  +
+                </button>
+                <span className="ml-2">Stock: {article.quantity}</span>
+                <button
+                  onClick={() => resetQuantity(article.id)}
+                  className="ml-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                >
+                  Reset
+                </button>
               </div>
+              {article.description && <p className="text-sm text-gray-600 mt-2">{article.description}</p>}
             </div>
           ))}
         </div>
 
-        {/* Message si aucun article trouvé */}
+        {/* Message si aucun article */}
         {filteredArticles.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              Aucun article trouvé
-            </p>
-          </div>
+          <p className="text-center py-4">Aucun article trouvé</p>
         )}
 
         {/* Bouton de création */}
-        <div className="flex justify-center mt-10">
+        <div className="text-center mt-6">
           <Link
             href="/create_article"
-            className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-semibold py-4 px-8 rounded-full shadow-md transition-all duration-300"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
           >
             Créer un article
           </Link>

@@ -34,7 +34,6 @@ create table article (
     price numeric(18, 2) not null,
     quantity integer not null default 0,
     description text,
-    image_url text,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now()                
 );
