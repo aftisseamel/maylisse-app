@@ -73,7 +73,7 @@ export default function SearchEverything() {
         {/* Section Commandes */}
         <div className="bg-white p-4 rounded-lg shadow mb-4">
           <h2 className="text-lg font-semibold mb-3">Rechercher une commande</h2>
-          <SearchBarOrders orders={orders} />
+          <SearchBarOrders orders={orders} onSearchResults={() => {}} />
         </div>
 
         {/* Section Livreurs */}
@@ -85,3 +85,4 @@ export default function SearchEverything() {
     </div>
   );
 }
+

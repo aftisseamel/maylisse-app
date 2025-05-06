@@ -1,8 +1,6 @@
 'use server'
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
 
 export async function createOrder(formData: FormData) {
     try {
@@ -27,7 +25,8 @@ export async function createOrder(formData: FormData) {
             return { error: error.message }
         }
 
-        revalidatePath('/create_order')
+        revalidatePath('/order')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error creating order:', error)

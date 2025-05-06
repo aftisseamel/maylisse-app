@@ -48,6 +48,11 @@ create table client (
     updated_at timestamp with time zone default now()                
 );
 
+create type delivery_man_status as enum (
+    'available',
+    'unavailable'
+);
+
 create table delivery_man (
     id serial primary key,
     pseudo_delivery_man varchar(255) not null unique,
@@ -57,7 +62,8 @@ create table delivery_man (
     phone varchar(20),
     address_delivery_man text,
     created_at timestamp with time zone default now(),
-    updated_at timestamp with time zone default now()                
+    updated_at timestamp with time zone default now(),
+    status delivery_man_status not null default 'unavailable'                
 );
 
 create type order_status as enum (

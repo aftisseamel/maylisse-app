@@ -79,6 +79,7 @@ export type Database = {
           last_name: string
           phone: string | null
           pseudo_delivery_man: string
+          status: Database["public"]["Enums"]["delivery_man_status"]
           updated_at: string | null
         }
         Insert: {
@@ -90,6 +91,7 @@ export type Database = {
           last_name: string
           phone?: string | null
           pseudo_delivery_man: string
+          status?: Database["public"]["Enums"]["delivery_man_status"]
           updated_at?: string | null
         }
         Update: {
@@ -101,6 +103,7 @@ export type Database = {
           last_name?: string
           phone?: string | null
           pseudo_delivery_man?: string
+          status?: Database["public"]["Enums"]["delivery_man_status"]
           updated_at?: string | null
         }
         Relationships: []
@@ -218,6 +221,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      delivery_man_status: "available" | "unavailable"
       order_status:
         | "initiated"
         | "preparation"
@@ -342,6 +346,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      delivery_man_status: ["available", "unavailable"],
       order_status: [
         "initiated",
         "preparation",

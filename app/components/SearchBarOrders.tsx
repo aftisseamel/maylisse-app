@@ -1,66 +1,37 @@
 "use client";
 
-import { Tables } from "@/database.types";
-import React, { ChangeEvent, useState } from "react";
-import { AiOutlineSearch } from "react-icons/ai";
+import { useState, useEffect } from 'react';
+import { Tables } from '@/database.types';
+import { IoSearch } from 'react-icons/io5';
 
-const SearchBar = ({ orders }: { orders: Tables<"order">[] }) => {
-  const [activeSearch, setActiveSearch] = useState<Tables<"order">[]>([]);
+interface SearchBarOrderProps {
+    orders: Tables<"order">[];
+    onSearchResults: (results: Tables<"order">[]) => void;
+}
 
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.trim().toLowerCase();
-    if (query === "") {
-      setActiveSearch([]);
-      return;
-    }
-    setActiveSearch(
-      orders
-        .filter((order) => order.name_client.toString().includes(query))
-        .slice(0, 8)
-    );
-  };
+export default function SearchBarOrder({ orders, onSearchResults }: SearchBarOrderProps) {
+    const [searchTerm, setSearchTerm] = useState('');
 
-  return (
-    <div className="w-full max-w-xl mx-auto relative">
-      {/* Barre de recherche */}
-      <div className="relative">
-        <input
-          type="search"
-          placeholder="Rechercher une commande..."
-          className="w-full px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-          onChange={handleSearch}
-        />
-        <button
-          type="button"
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-600 text-white rounded-full p-2 hover:bg-indigo-700 transition-all"
-        >
-          <AiOutlineSearch size={20} />
-        </button>
-      </div>
+    useEffect(() => {
+        const filtered = orders.filter(order => 
+            (order.delivery_address?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.pseudo_delivery_man?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.name_client?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+            (order.status?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        );
+        onSearchResults(filtered);
+    }, [searchTerm, orders, onSearchResults]);
 
-      {/* Résultats */}
-      {activeSearch.length > 0 && (
-        <div className="absolute top-16 w-full bg-white rounded-2xl shadow-lg p-4 mt-2 flex flex-col gap-4 z-10">
-          {activeSearch.map((order, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all"
-            >
-              
-
-              {/* Infos */}
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-800">{order.name_client}</span>
-                <span className="text-sm text-gray-500">
-                  adressse :  {order.delivery_address} status: {order.status}
-                </span>
-              </div>
-            </div>
-          ))}
+    return (
+        <div className="relative">
+            <input
+                type="text"
+                placeholder="Rechercher une commande..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <IoSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
-      )}
-    </div>
-  );
-};
-
-export default SearchBar;
+    );
+}

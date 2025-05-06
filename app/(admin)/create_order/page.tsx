@@ -1,74 +1,209 @@
 'use client'
-import { useTransition } from "react";
-import { redirect } from "next/navigation";
+
+import { useTransition, useState, useEffect } from "react";
 import { createOrder } from "./action";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { createClient } from '@/utils/supabase/client';
+import { Tables } from '@/database.types';
+import Select from '@/app/components/Select';
+import Input from '@/app/components/Input';
 
-export default function Create_order() {
-
+export default function CreateOrder() {
+    const router = useRouter();
     const [isPending, startTransition] = useTransition();
+    const [deliveryMen, setDeliveryMen] = useState<Tables<"delivery_man">[]>([]);
+    const [clients, setClients] = useState<Tables<"client">[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [formData, setFormData] = useState({
+        delivery_address: '',
+        pseudo_delivery_man: '',
+        name_client: '',
+        description_order: '',
+        status: 'initiated'
+    });
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const supabase = createClient();
+            
+            // Fetch delivery men
+            const { data: deliveryMenData, error: deliveryMenError } = await supabase
+                .from('delivery_man')
+                .select('*')
+                .order('pseudo_delivery_man');
+
+            if (deliveryMenError) {
+                console.error('Error fetching delivery men:', deliveryMenError);
+                setError('Erreur lors du chargement des livreurs');
+                return;
+            }
+
+            // Fetch clients
+            const { data: clientsData, error: clientsError } = await supabase
+                .from('client')
+                .select('*')
+                .order('name');
+
+            if (clientsError) {
+                console.error('Error fetching clients:', clientsError);
+                setError('Erreur lors du chargement des clients');
+                return;
+            }
+
+            setDeliveryMen(deliveryMenData || []);
+            setClients(clientsData || []);
+        };
+
+        fetchData();
+    }, []);
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
+        setError(null);
+
+        // Vérifier que tous les champs requis sont remplis
+        if (!formData.description_order.trim()) {
+            setError('La description de la commande est requise');
+            return;
+        }
+
+        if (!formData.pseudo_delivery_man) {
+            setError('Veuillez sélectionner un livreur');
+            return;
+        }
+
+        if (!formData.name_client) {
+            setError('Veuillez sélectionner un client');
+            return;
+        }
+
+        const formDataObj = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            if (value) { // Ne pas envoyer les valeurs vides
+                formDataObj.append(key, value);
+            }
+        });
+
         startTransition(async () => {
-            await createOrder(formData);
-            redirect('/order');
+            const result = await createOrder(formDataObj);
+            if (result?.error) {
+                setError(result.error);
+            } else if (result?.success) {
+                router.push('/order');
+            }
         });
     };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value || null // Convertir les chaînes vides en null
+        }));
+    };
+
+    const statusOptions = [
+        { value: 'initiated', label: 'Initialisée' },
+        { value: 'preparation', label: 'En préparation' },
+        { value: 'prepared', label: 'Préparée' },
+        { value: 'delivering', label: 'En livraison' },
+        { value: 'delivered', label: 'Livrée' },
+        { value: 'finished', label: 'Terminée' },
+        { value: 'canceled', label: 'Annulée' }
+    ];
+
     return (
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
-      <h1 className="text-2xl font-bold text-center mb-6"> Créer une commande </h1>
+            <h1 className="text-2xl font-bold text-center mb-6">Créer une commande</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-       
-            <Input name="delivery_address" placeholder="adresse de livraison" required />
-            <Input name="pseudo" placeholder="pseudo du livreur" required />
-            <Input name="name_client" placeholder="nom du client" required />
-            <Input name="description commande" placeholder="description de la commande" required />
-            <select
-                name="status" 
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                required
-                defaultValue=""
-            >   
-                <option value="" disabled>Choisir status</option>
-                <option value="initiated">initiated</option>
-                <option value="preparation">preparation</option>
-                <option value="prepared">prepared</option>
-                <option value="delivering">delivering</option>
-                <option value="delivered">delivering</option>
-                <option value="finished">finished</option>
-                <option value="canceled">delivering</option>
-              </select>
+            {error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-600">{error}</p>
+                </div>
+            )}
 
-            <button
-          type="submit"
-          disabled={isPending}
-          className={`w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all ${
-            isPending ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-        >
-          {isPending ? 'Création...' : 'Créer'}
-        </button>
-        </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <Input 
+                    name="delivery_address" 
+                    label="Adresse de livraison"
+                    placeholder="Adresse de livraison" 
+                    required 
+                    value={formData.delivery_address}
+                    onChange={handleInputChange}
+                />
+                
+                <Select
+                    name="pseudo_delivery_man"
+                    label="Livreur"
+                    options={deliveryMen.map(dm => ({
+                        value: dm.pseudo_delivery_man,
+                        label: dm.pseudo_delivery_man
+                    }))}
+                    required
+                    searchable
+                    value={formData.pseudo_delivery_man}
+                    onChange={handleSelectChange}
+                />
 
-        <Link href="/ajuster_la_commande" className="text-indigo-600 hover:underline mt-4 block text-center">
-          ajouter les articles et prix à la commande        
-        </Link>
-        
+                <Select
+                    name="name_client"
+                    label="Client"
+                    options={clients.map(client => ({
+                        value: client.name,
+                        label: client.name
+                    }))}
+                    required
+                    searchable
+                    value={formData.name_client}
+                    onChange={handleSelectChange}
+                />
+
+                <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Description
+                    </label>
+                    <textarea
+                        name="description_order"
+                        placeholder="Description de la commande"
+                        required
+                        value={formData.description_order}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all min-h-[100px]"
+                    />
+                </div>
+
+                <Select
+                    name="status"
+                    label="Statut"
+                    options={statusOptions}
+                    required
+                    value={formData.status}
+                    onChange={handleSelectChange}
+                />
+
+                <button
+                    type="submit"
+                    disabled={isPending}
+                    className={`w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all ${
+                        isPending ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                >
+                    {isPending ? 'Création...' : 'Créer'}
+                </button>
+            </form>
+
+            <Link href="/order" className="text-indigo-600 hover:underline mt-4 block text-center">
+                Retour à la liste des commandes
+            </Link>
         </div>
-    )
-}
-
-function Input({ name, type = 'text', placeholder, required = false }: { name: string; type?: string; placeholder: string; required?: boolean }) {
-    return (
-      <input
-        type={type}
-        name={name}
-        placeholder={placeholder}
-        required={required}
-        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-      />
     );
-  }
-  
+}

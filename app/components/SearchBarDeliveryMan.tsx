@@ -1,46 +1,50 @@
 "use client";
 
-import { Tables } from "@/database.types";
-import React, { ChangeEvent, useState } from "react";
+import { useState, useEffect } from 'react';
+import { Tables } from '@/database.types';
+import React, { ChangeEvent } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
+
+interface SearchBarDeliveryManProps {
+  deliveryMen: Tables<"delivery_man">[];
+  onSearchResults?: (results: Tables<"delivery_man">[]) => void;
+}
 
 const SearchBar = ({ 
   deliveryMen, 
   onSearchResults 
-}: { 
-  deliveryMen: Tables<"delivery_man">[];
-  onSearchResults?: (results: Tables<"delivery_man">[]) => void;
-}) => {
+}: SearchBarDeliveryManProps) => {
+  const [query, setQuery] = useState('');
   const [activeSearch, setActiveSearch] = useState<Tables<"delivery_man">[]>([]);
 
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.trim().toLowerCase();
-    if (query === "") {
-      const results = deliveryMen;
+  useEffect(() => {
+    if (query.trim() === '') {
       setActiveSearch([]);
-      onSearchResults?.(results);
+      if (onSearchResults) onSearchResults(deliveryMen);
       return;
     }
-    const results = deliveryMen
-      .filter((deliveryMan) => 
-        deliveryMan.pseudo_delivery_man.toLowerCase().includes(query) ||
-        deliveryMan.first_name.toLowerCase().includes(query) ||
-        deliveryMan.last_name.toLowerCase().includes(query)
-      )
-      .slice(0, 8);
-    setActiveSearch(results);
-    onSearchResults?.(results);
-  };
+
+    const filtered = deliveryMen.filter(deliveryMan =>
+      deliveryMan.pseudo_delivery_man.toLowerCase().includes(query) ||
+      deliveryMan.first_name.toLowerCase().includes(query) ||
+      deliveryMan.last_name.toLowerCase().includes(query) ||
+      deliveryMan.email.toLowerCase().includes(query)
+    );
+
+    setActiveSearch(filtered);
+    if (onSearchResults) onSearchResults(filtered);
+  }, [query, deliveryMen, onSearchResults]);
 
   return (
     <div className="w-full max-w-xl mx-auto relative">
       {/* Barre de recherche */}
       <div className="relative">
         <input
-          type="search"
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher un livreur..."
-          className="w-full px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-          onChange={handleSearch}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <button
           type="button"
@@ -63,6 +67,13 @@ const SearchBar = ({
                 <span className="font-semibold text-gray-800">{deliveryMan.pseudo_delivery_man}</span>
                 <span className="text-sm text-gray-500">
                   {deliveryMan.first_name} {deliveryMan.last_name}
+                </span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  deliveryMan.status === 'available'
+                    ? 'bg-green-100 text-green-600'
+                    : 'bg-red-100 text-red-600'
+                }`}>
+                  {deliveryMan.status === 'available' ? 'Disponible' : 'Indisponible'}
                 </span>
               </div>
             </div>
