@@ -7,14 +7,11 @@ import data_orders from '@/app/data_orders';
 
 export default function DeliveryManPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
+
     const [deliveryMan, setDeliveryMan] = useState<Tables<"delivery_man"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [status, setStatus] = useState<string | null>(null);
-    const handleStatus = (status: string) => {
-        setStatus(status);
-    }
-
+    
     const updateOrderStatus = async (orderId: number) => {
         try {
             const supabase = createClient();
