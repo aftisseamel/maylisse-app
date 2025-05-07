@@ -5,7 +5,7 @@ import { Tables } from '@/database.types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-
+import data_clients from '@/app/data_clients';
 export default function Page() {
   const router = useRouter();
   const [clients, setClients] = useState<Tables<"client">[]>([]);
@@ -17,15 +17,11 @@ export default function Page() {
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('client')
-          .select('*');
+        const client = await data_clients();
 
-        if (error) throw error;
         
-        setClients(data || []);
-        setFilteredClients(data || []);
+        setClients(client || []);
+        setFilteredClients(client || []);
       } catch (err) {
         console.error('Error:', err);
       } finally {
@@ -88,6 +84,7 @@ export default function Page() {
                 <button 
                 type="button"
                 onClick={() => {
+
                   router.push(`/clientID/${client.name}`);
                 }}
                 >

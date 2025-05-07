@@ -1,9 +1,11 @@
-'use client'
-import { useState, useEffect, use } from "react"
+'use server'
+
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/server';
 
 const data_delivery_men = async () : Promise<Tables<"delivery_man">[]> => {
+
+    
     try {
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -17,7 +19,7 @@ const data_delivery_men = async () : Promise<Tables<"delivery_man">[]> => {
         }
 
         return data
-        
+
     } catch (error) {
         console.error('Error:', error);
         return [];

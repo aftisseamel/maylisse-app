@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
-import { createClient } from '@/utils/supabase/client';
 import data_orders from '@/app/data_orders';
 import data_clients from '@/app/data_clients';
 
@@ -17,11 +16,11 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
 
     useEffect(() => {
         const fetchClientData = async () => {
-            try {
-                const supabase = createClient();
-                
+            try {                
                 // Récupérer les informations du client
                 const clients = await data_clients();
+                console.log("clients : ", clients)
+                
                 const client = clients.find(c => c.name === decodeURIComponent(resolvedParams.name));
                 setClient(client || null);
 
