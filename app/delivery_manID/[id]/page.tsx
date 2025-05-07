@@ -3,7 +3,6 @@
 import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/client';
-import Link from 'next/link';
 import data_orders from '@/app/data_orders';
 
 export default function DeliveryManPage({ params }: { params: Promise<{ id: string }> }) {
@@ -43,24 +42,103 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
     }, [resolvedParams.id]);
 
     if (isLoading) {
-        return <div>Chargement...</div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+            </div>
+        );
     }
 
     if (!deliveryMan) {
-        return <div>Livreur non trouvé</div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-800">Livreur non trouvé</h2>
+                    <p className="text-gray-600 mt-2">Le livreur que vous recherchez n'existe pas.</p>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <h1>Commandes de {deliveryMan.pseudo_delivery_man}</h1>
-            {orders.map((order) => (
-                <div key={order.id}>
-                    <h2>Commande #{order.id}</h2>
-                    <p>Status: {order.status}</p>
-                    <p>Adresse: {order.delivery_address}</p>
-                    <p>Client: {order.name_client}</p>
+        <div className="min-h-screen bg-gray-50 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* En-tête */}
+                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Commandes de {deliveryMan.pseudo_delivery_man}
+                    </h1>
+                    <div className="flex items-center space-x-4 text-gray-600">
+                        <p>{deliveryMan.email}</p>
+                        {deliveryMan.phone && <p>• {deliveryMan.phone}</p>}
+                    </div>
                 </div>
-            ))}
+
+                {/* Liste des commandes */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {orders.map((order) => (
+                        <div key={order.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+                            <div className="flex justify-between items-start mb-4">
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                    Commande #{order.id}
+                                </h2>
+                                <span className={`px-3 py-1 text-sm font-medium rounded-full
+                                    ${order.status === 'initiated' ? 'bg-yellow-100 text-yellow-800' :
+                                    order.status === 'preparation' ? 'bg-blue-100 text-blue-800' :
+                                    order.status === 'prepared' ? 'bg-purple-100 text-purple-800' :
+                                    order.status === 'delivering' ? 'bg-orange-100 text-orange-800' :
+                                    order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                    order.status === 'finished' ? 'bg-gray-100 text-gray-800' :
+                                    'bg-red-100 text-red-800'}`}>
+                                    {order.status}
+                                </span>
+                            </div>
+                            
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Adresse de livraison</p>
+                                    <p className="text-gray-900">{order.delivery_address}</p>
+                                </div>
+                                
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Client</p>
+                                    <p className="text-gray-900">{order.name_client}</p>
+                                </div>
+
+                                {order.description_order && (
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-500">Description</p>
+                                        <p className="text-gray-900">{order.description_order}</p>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Date de création</p>
+                                    <p className="text-gray-900">
+                                        {order.created_at ? new Date(order.created_at).toLocaleDateString() : ''}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={() => {
+                                    // TODO: Implémenter la logique de gestion de commande
+                                    console.log('Gérer la commande:', order.id);
+                                }}
+                                className="mt-4 w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                Gérer la commande
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
+                {orders.length === 0 && (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500 text-lg">Aucune commande à afficher</p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
