@@ -7,32 +7,56 @@ import data_orders from '@/app/data_orders';
 
 export default function DeliveryManPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
-
     const [deliveryMan, setDeliveryMan] = useState<Tables<"delivery_man"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    
-    const updateOrderStatus = async (orderId: number) => {
+    const [comments, setComments] = useState<{ [key: number]: string }>({});
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+
+    const updateOrderStatus = async (orderId: number, currentStatus: string) => {
         try {
             const supabase = createClient();
+            let newStatus: 'delivering' | 'delivered' | 'finished';
+
+            if (currentStatus === 'prepared') {
+                newStatus = 'delivering';
+            } else if (currentStatus === 'delivering') {
+                newStatus = 'delivered';
+            } else if (currentStatus === 'delivered') {
+                newStatus = 'finished';
+            } else {
+                throw new Error('Invalid status');
+            }
+            
             const { error } = await supabase
                 .from('order')
-                .update({ status: 'delivering' })
+                .update({ status: newStatus })
                 .eq('id', orderId);
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error updating order:', error);
+                throw error;
+            }
 
             // Mettre à jour la liste des commandes
             const allOrders = await data_orders();
             const deliveryManOrders = allOrders.filter(o => 
                 o.pseudo_delivery_man === deliveryMan?.pseudo_delivery_man && 
-                (o.status === 'prepared' || o.status === 'delivering')
+                (o.status === 'prepared' || o.status === 'delivering' || o.status === 'delivered' || o.status === 'finished')
             );
             setOrders(deliveryManOrders);
 
         } catch (error) {
             console.error('Error updating order status:', error);
+            alert('Une erreur est survenue lors de la mise à jour de la commande');
         }
+    };
+
+    const handleCommentChange = (orderId: number, comment: string) => {
+        setComments(prev => ({
+            ...prev,
+            [orderId]: comment
+        }));
     };
 
     useEffect(() => {
@@ -54,7 +78,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 const allOrders = await data_orders();
                 const deliveryManOrders = allOrders.filter(o => 
                     o.pseudo_delivery_man === deliveryManData.pseudo_delivery_man && 
-                    (o.status === 'prepared' || o.status === 'delivering')
+                    (o.status === 'prepared' || o.status === 'delivering' || o.status === 'delivered' || o.status === 'finished')
                 );
                 setOrders(deliveryManOrders);
 
@@ -67,6 +91,11 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
 
         fetchDeliveryManData();
     }, [resolvedParams.id]);
+
+    // Filtrer les commandes en fonction du statut sélectionné
+    const filteredOrders = orders.filter(order => 
+        statusFilter === 'all' || order.status === statusFilter
+    );
 
     if (isLoading) {
         return (
@@ -93,7 +122,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 {/* En-tête */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Commandes à livrer pour {deliveryMan.pseudo_delivery_man}
+                        Commandes à livrer par {deliveryMan.pseudo_delivery_man}
                     </h1>
                     <div className="flex items-center space-x-4 text-gray-600">
                         <p>{deliveryMan.email}</p>
@@ -101,16 +130,33 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </div>
 
+                {/* Filtre de statut */}
+                <div className="mb-6">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    >
+                        <option value="all">Tous les statuts</option>
+                        <option value="prepared">Préparées</option>
+                        <option value="delivering">En livraison</option>
+                        <option value="delivered">Livrées</option>
+                        <option value="finished">Terminées</option>
+                    </select>
+                </div>
+
                 {/* Liste des commandes */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {orders.map((order) => (
+                    {filteredOrders.map((order) => (
                         <div key={order.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-4">
                                 <h2 className="text-xl font-semibold text-gray-900">
                                     Commande #{order.id}
                                 </h2>
                                 <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                                    order.status === 'prepared' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+                                    order.status === 'prepared' ? 'bg-purple-100 text-purple-800' : 
+                                    order.status === 'delivering' ? 'bg-green-100 text-green-800' :
+                                    'bg-blue-100 text-blue-800'
                                 }`}>
                                     {order.status}
                                 </span>
@@ -140,14 +186,41 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                                         {order.created_at ? new Date(order.created_at).toLocaleDateString() : ''}
                                     </p>
                                 </div>
+
+                                {order.status === 'delivered' && (
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-500 mb-2">Commentaire (optionnel)</p>
+                                        <textarea
+                                            value={comments[order.id] || ''}
+                                            onChange={(e) => handleCommentChange(order.id, e.target.value)}
+                                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            rows={3}
+                                            placeholder="Ajouter un commentaire sur la livraison..."
+                                        />
+                                    </div>
+                                )}
                             </div>
 
-                            <button 
-                                onClick={() => updateOrderStatus(order.id)}
-                                className="mt-4 w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                            >
-                                Commencer la livraison
-                            </button>
+                            <div className="mt-4 space-y-2">
+                                {order.status !== 'finished' && (
+                                    <button 
+                                        onClick={() => updateOrderStatus(order.id, order.status)}
+                                        className={`w-full px-4 py-2 rounded-lg transition-colors ${
+                                            order.status === 'prepared' 
+                                                ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                                                : order.status === 'delivering'
+                                                ? 'bg-green-600 hover:bg-green-700 text-white'
+                                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                        }`}
+                                    >
+                                        {order.status === 'prepared' 
+                                            ? 'Commencer la livraison' 
+                                            : order.status === 'delivering'
+                                            ? 'Finir la livraison'
+                                            : 'Finaliser la commande'}
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
