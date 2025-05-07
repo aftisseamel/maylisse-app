@@ -10,6 +10,33 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
     const [deliveryMan, setDeliveryMan] = useState<Tables<"delivery_man"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [status, setStatus] = useState<string | null>(null);
+    const handleStatus = (status: string) => {
+        setStatus(status);
+    }
+
+    const updateOrderStatus = async (orderId: number) => {
+        try {
+            const supabase = createClient();
+            const { error } = await supabase
+                .from('order')
+                .update({ status: 'delivering' })
+                .eq('id', orderId);
+
+            if (error) throw error;
+
+            // Mettre à jour la liste des commandes
+            const allOrders = await data_orders();
+            const deliveryManOrders = allOrders.filter(o => 
+                o.pseudo_delivery_man === deliveryMan?.pseudo_delivery_man && 
+                (o.status === 'prepared' || o.status === 'delivering')
+            );
+            setOrders(deliveryManOrders);
+
+        } catch (error) {
+            console.error('Error updating order status:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchDeliveryManData = async () => {
@@ -26,11 +53,11 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 if (deliveryManError) throw deliveryManError;
                 setDeliveryMan(deliveryManData);
 
-                // Récupérer les commandes du livreur avec status 'prepared'
+                // Récupérer les commandes du livreur avec status 'prepared' ou 'delivering'
                 const allOrders = await data_orders();
                 const deliveryManOrders = allOrders.filter(o => 
                     o.pseudo_delivery_man === deliveryManData.pseudo_delivery_man && 
-                    o.status === 'prepared'
+                    (o.status === 'prepared' || o.status === 'delivering')
                 );
                 setOrders(deliveryManOrders);
 
@@ -69,7 +96,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 {/* En-tête */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        Commandes prêtes à livrer pour {deliveryMan.pseudo_delivery_man}
+                        Commandes à livrer pour {deliveryMan.pseudo_delivery_man}
                     </h1>
                     <div className="flex items-center space-x-4 text-gray-600">
                         <p>{deliveryMan.email}</p>
@@ -85,7 +112,9 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                                 <h2 className="text-xl font-semibold text-gray-900">
                                     Commande #{order.id}
                                 </h2>
-                                <span className="px-3 py-1 text-sm font-medium rounded-full bg-purple-100 text-purple-800">
+                                <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                                    order.status === 'prepared' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'
+                                }`}>
                                     {order.status}
                                 </span>
                             </div>
@@ -117,10 +146,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                             </div>
 
                             <button 
-                                onClick={() => {
-                                    // TODO: Implémenter la logique de gestion de commande
-                                    console.log('Gérer la commande:', order.id);
-                                }}
+                                onClick={() => updateOrderStatus(order.id)}
                                 className="mt-4 w-full bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
                             >
                                 Commencer la livraison
@@ -131,7 +157,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
 
                 {orders.length === 0 && (
                     <div className="text-center py-12">
-                        <p className="text-gray-500 text-lg">Aucune commande prête à livrer</p>
+                        <p className="text-gray-500 text-lg">Aucune commande à livrer</p>
                     </div>
                 )}
             </div>
