@@ -11,7 +11,7 @@ export async function createOrder(formData: FormData) {
             pseudo_delivery_man: formData.get('pseudo_delivery_man') as string,
             name_client: formData.get('name_client') as string,
             description_order: formData.get('description_order') as string,
-            status: 'initiated' as const,
+            status: formData.get('status') as 'initiated' | 'preparation' | 'prepared' | 'delivering' | 'delivered' | 'finished' | 'canceled',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }

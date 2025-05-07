@@ -20,7 +20,7 @@ export default function CreateOrder() {
         pseudo_delivery_man: '',
         name_client: '',
         description_order: '',
-        status: 'initiated'
+        status: ''
     });
 
     useEffect(() => {
