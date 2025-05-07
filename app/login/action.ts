@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
-import ErrorPage from '../error/page'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -14,7 +13,8 @@ export async function login(formData: FormData) {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   }
-
+  const emailData = data.email
+  console.log(" PREMIER TRUC data : ", data)
   const { data: signInData, error } = await supabase.auth.signInWithPassword(data);
 
   console.log('error', error)
@@ -29,20 +29,21 @@ export async function login(formData: FormData) {
     const userId = signInData.session?.user?.id;
 
     const {data :profile} = await supabase.from('profiles').select('role_profile').eq('id', userId).single();
-    console.log('profile', profile)
+    const {data : deliveryMan} = await supabase.from('delivery_man').select('*').eq('email', emailData).single();
+    console.log('deliveryMan : ', deliveryMan)
+
     if (profile && profile.role_profile === 'admin') {
       revalidatePath('/', 'layout')
       redirect('/admin')
     }
-    if (profile && profile.role_profile === 'delivery_man') {
+    if (profile && profile.role_profile === 'delivery_man' && deliveryMan) {
       revalidatePath('/', 'layout')
-      redirect('/livreurs')
+      redirect(`/delivery_manID/${deliveryMan.id}`);
   }
 
 }
 
 }
-
 
 
 export async function signup(formData: FormData) {

@@ -105,6 +105,7 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                                     <p className="text-xs text-gray-500 mt-2">
                                         {order.created_at ? new Date(order.created_at).toLocaleDateString() : ''}
                                     </p>
+                                    <p> ICI CA DOIT ME LAISSER GERER LA COMMANDE</p>
                                 </div>
                             ))}
                         </div>
