@@ -131,7 +131,9 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                                             onClick={
                                                 () => {
                                                     console.log("Ajouter des articles à la commande")
-                                                    router.push('/addArticles')
+                                                    const orderId = order.id;
+                                                    
+                                                    router.push(`/orderID/${orderId}`)
                                                 }
 
                                             }
