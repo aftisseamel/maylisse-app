@@ -13,6 +13,10 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
     const [client, setClient] = useState<Tables<"client"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [statusCommands, setStatusCommands] = useState<string>('initiated');
+
+    const [statusOrdersInitiated, setStatusOrdersInitiated] = useState<Tables<"order">[]>([]);
+
 
     useEffect(() => {
         const fetchClientData = async () => {
@@ -28,6 +32,10 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                 const orders = await data_orders();
                 const clientOrders = orders.filter(o => o.name_client === decodeURIComponent(resolvedParams.name));
                 setOrders(clientOrders);
+
+                const statusOrdersInitiated = clientOrders.filter(o => o.status == 'initiated');
+                setStatusOrdersInitiated(statusOrdersInitiated)
+                console.log(" VOICI LE STATUS DES COMMANDES AVEC INITIATES  : ", statusOrdersInitiated)
 
             } catch (error) {
                 console.error('Error:', error);
@@ -46,6 +54,10 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
     if (!client) {
         return <div>Client non trouvé</div>;
     }
+
+    const filteredOrders = orders.filter(order => order.status === statusCommands);
+
+
 
     return (
         <div className="p-4">
