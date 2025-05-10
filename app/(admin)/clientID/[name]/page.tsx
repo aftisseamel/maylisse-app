@@ -4,19 +4,18 @@ import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
 import data_orders from '@/app/data_orders';
 import data_clients from '@/app/data_clients';
+import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
 
 export default function ClientPage({ params }: { params: Promise<{ name: string }> }) {
     const resolvedParams = use(params);
+    const router = useRouter();
     
     const [client, setClient] = useState<Tables<"client"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [statusCommands, setStatusCommands] = useState<string>('initiated');
-
-    const [statusOrdersInitiated, setStatusOrdersInitiated] = useState<Tables<"order">[]>([]);
-
+   
 
     useEffect(() => {
         const fetchClientData = async () => {
@@ -31,11 +30,22 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                 // Récupérer les commandes du client
                 const orders = await data_orders();
                 const clientOrders = orders.filter(o => o.name_client === decodeURIComponent(resolvedParams.name));
-                setOrders(clientOrders);
 
-                const statusOrdersInitiated = clientOrders.filter(o => o.status == 'initiated');
-                setStatusOrdersInitiated(statusOrdersInitiated)
-                console.log(" VOICI LE STATUS DES COMMANDES AVEC INITIATES  : ", statusOrdersInitiated)
+                // Trier les commandes par statut
+                const sortedOrders = clientOrders.sort((a, b) => {
+                    const statusOrder = {
+                        'initiated': 1,
+                        'preparation': 2,
+                        'prepared': 3,
+                        'delivering': 4,
+                        'delivered': 5,
+                        'finished': 6
+                    };
+                    return (statusOrder[a.status as keyof typeof statusOrder] || 0) - 
+                           (statusOrder[b.status as keyof typeof statusOrder] || 0);
+                });
+                setOrders(sortedOrders);
+
 
             } catch (error) {
                 console.error('Error:', error);
@@ -55,11 +65,9 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
         return <div>Client non trouvé</div>;
     }
 
-    const filteredOrders = orders.filter(order => order.status === statusCommands);
-
-
 
     return (
+
         <div className="p-4">
             <div className="max-w-6xl mx-auto">
                 {/* En-tête avec informations du client */}
@@ -116,7 +124,24 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                                     <p className="text-xs text-gray-500 mt-2">
                                         {order.created_at ? new Date(order.created_at).toLocaleDateString() : ''}
                                     </p>
-                                    <p> ICI CA DOIT ME LAISSER GERER LA COMMANDE</p>
+
+                                    {order.status === 'initiated' && (
+                                        <div>
+                                            <button className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                            onClick={
+                                                () => {
+                                                    console.log("Ajouter des articles à la commande")
+                                                    router.push('/addArticles')
+                                                }
+
+                                            }
+                                            >
+                                                <p> Ajouter des articles à la commande </p>
+                                                
+                                            </button>
+                                        </div>
+                                    )}
+                                    
                                 </div>
                             ))}
                         </div>
