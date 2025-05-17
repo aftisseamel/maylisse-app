@@ -1,6 +1,9 @@
 'use server'
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { Tables } from "@/database.types";
+
+type OrderStatus = Tables<"order">["status"]
 
 export async function createOrder(formData: FormData) {
     try {
@@ -11,7 +14,7 @@ export async function createOrder(formData: FormData) {
             pseudo_delivery_man: formData.get('pseudo_delivery_man') as string,
             name_client: formData.get('name_client') as string,
             description_order: formData.get('description_order') as string,
-            status: formData.get('status') as 'initiated' | 'preparation' | 'prepared' | 'delivering' | 'delivered' | 'finished' | 'canceled',
+            status: formData.get('status') as OrderStatus,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }

@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { createArticle } from './action';
 import { useTransition } from 'react';
-
+import Input from '@/app/components/Input';
 export default function Create_article() {
   const [isPending, startTransition] = useTransition();
 
@@ -41,14 +41,4 @@ export default function Create_article() {
   );
 }
 
-function Input({ name, type = 'text', placeholder, required = false }: { name: string; type?: string; placeholder: string; required?: boolean }) {
-  return (
-    <input
-      type={type}
-      name={name}
-      placeholder={placeholder}
-      required={required}
-      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-    />
-  );
-}
+

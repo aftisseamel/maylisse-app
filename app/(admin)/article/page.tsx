@@ -8,6 +8,7 @@ import data_articles from "../../data_articles";
 import { createClient } from '@/utils/supabase/client';
 
 export default function Page() {
+
   const [articles, setArticles] = useState<Tables<"article">[]>([]);
   const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,7 +30,7 @@ export default function Page() {
     fetchArticles();
   }, []);
 
-  // Mettre à jour les articles filtrés quand on recherche
+  // Mettre à jour les articles filtrés quand on les recherche
   const handleSearchResults = (results: Tables<"article">[]) => {
     setFilteredArticles(results);
   };
