@@ -60,12 +60,28 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
 
    
     const handleSelectArticle = (article: Tables<"article">) => {
-        setArticleToSelect(article);
-        formData.id_article = article.id;
+        if (articleToSelect?.id === article.id) {
+            setArticleToSelect(null);
+            setFormData({
+                ...formData,
+                id_article: 0,
+                price: 0,
+                quantity: 0
+            });
+        } else {
+            setArticleToSelect(article);
+            setFormData({
+                ...formData,
+                id_article: article.id
+            });
+        }
     }
 
     const handleSubmitAddArticle = async () => {
-        console.log(formData);
+        if (!formData.price || !formData.quantity) {
+            alert('Veuillez remplir tous les champs');
+            return;
+        }
         
         const formDataObj = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
@@ -75,7 +91,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         });
 
         const response = await insertOrderArticle(formDataObj);
-
         console.log(response);
     }
 
@@ -139,6 +154,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                     type='submit' 
                                     onClick={() => handleSubmitAddArticle()}
                                     className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                                    disabled={!formData.price || !formData.quantity}
                                 >
                                     Confirmer l'ajout
                                 </button>
