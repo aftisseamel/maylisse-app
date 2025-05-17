@@ -14,6 +14,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     const [articles, setArticles] = useState<Tables<"article">[]>([]);
     const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
     const [articleToSelect, setArticleToSelect] = useState<Tables<"article"> | null>(null);
+    const [orderArticles, setOrderArticles] = useState<(Tables<"order_article"> & { article: Tables<"article"> | null })[]>([]);
 
     const [formData, setFormData] = useState({
         id_order: parseInt(searchParams.id),
@@ -47,18 +48,27 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                 setArticles(dataArticles);
                 setFilteredArticles(dataArticles);
             }
+
+            const { data: orderArticlesData, error: orderArticlesError } = await supabase
+                .from('order_article')
+                .select('*, article(*)')
+                .eq('id_order', parseInt(searchParams.id));
+
+            if (orderArticlesError) {
+                console.error('Error fetching order articles:', orderArticlesError);
+            } else {
+                setOrderArticles(orderArticlesData);
+            }
+
             setIsLoading(false);
         }
         fetchOrder();
     }, [searchParams.id]);
 
-
     const handleSearchResults = (results: Tables<"article">[]) => {
         setFilteredArticles(results);
-
     }
 
-   
     const handleSelectArticle = (article: Tables<"article">) => {
         if (articleToSelect?.id === article.id) {
             setArticleToSelect(null);
@@ -78,7 +88,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     }
 
     const handleSubmitAddArticle = async () => {
-        if (formData.price === 0 || formData.quantity === 0) {
+        if (!formData.price || !formData.quantity) {
             alert('Veuillez remplir tous les champs');
             return;
         }
@@ -92,9 +102,26 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
 
         const response = await insertOrderArticle(formDataObj);
         
-        console.log(response);
         if (response.success) {
-            alert('Article ajouté avec succès');
+            // Mettre à jour la liste des articles de la commande
+            const supabase = createClient();
+            const { data: orderArticlesData, error: orderArticlesError } = await supabase
+                .from('order_article')
+                .select('*, article(*)')
+                .eq('id_order', parseInt(searchParams.id));
+
+            if (!orderArticlesError) {
+                setOrderArticles(orderArticlesData);
+            }
+            
+            // Réinitialiser le formulaire
+            setArticleToSelect(null);
+            setFormData({
+                ...formData,
+                id_article: 0,
+                price: 0,
+                quantity: 0
+            });
         } else {
             alert('l\'article existe peut etre deja dans la commande');
         }
@@ -119,6 +146,29 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                             <p className="font-medium">{order?.description_order}</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">Articles de la commande</h2>
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    {orderArticles.length === 0 ? (
+                        <p className="text-gray-500">Aucun article dans la commande</p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {orderArticles.map((orderArticle) => (
+                                <div key={`${orderArticle.id_order}-${orderArticle.id_article}`} className="bg-gray-50 rounded-lg p-4">
+                                    <h3 className="font-semibold text-gray-800">{orderArticle.article?.name}</h3>
+                                    <div className="mt-2 space-y-1">
+                                        <p className="text-sm text-gray-600">Lots: {orderArticle.quantity}</p>
+                                        <p className="text-sm text-gray-600">Quantité totale: {orderArticle.quantity * 2000}</p>
+                                        <p className="text-sm text-gray-600">Prix unitaire: {orderArticle.price}€</p>
+                                        <p className="text-sm text-gray-600">Prix total: {orderArticle.price * orderArticle.quantity * 2000}€</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
