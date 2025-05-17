@@ -15,6 +15,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
     const [articleToSelect, setArticleToSelect] = useState<Tables<"article"> | null>(null);
     const [orderArticles, setOrderArticles] = useState<(Tables<"order_article"> & { article: Tables<"article"> | null })[]>([]);
+    const [editingArticle, setEditingArticle] = useState<{ id_order: number; id_article: number; price: number; quantity: number } | null>(null);
 
     const [formData, setFormData] = useState({
         id_order: parseInt(searchParams.id),
@@ -148,6 +149,50 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             }   
     }
 
+    const handleEditArticle = (orderArticle: Tables<"order_article">) => {
+        setEditingArticle({
+            id_order: orderArticle.id_order,
+            id_article: orderArticle.id_article,
+            price: orderArticle.price,
+            quantity: orderArticle.quantity
+        });
+    };
+
+    const handleUpdateArticle = async () => {
+        if (!editingArticle) return;
+
+        const supabase = createClient();
+        const { error } = await supabase
+            .from('order_article')
+            .update({
+                price: editingArticle.price,
+                quantity: editingArticle.quantity
+            })
+            .eq('id_order', editingArticle.id_order)
+            .eq('id_article', editingArticle.id_article);
+
+        if (error) {
+            console.error('Error updating article:', error);
+            return;
+        }
+
+        // Rafraîchir la liste des articles
+        const { data: orderArticlesData, error: orderArticlesError } = await supabase
+            .from('order_article')
+            .select('*, article(*)')
+            .eq('id_order', parseInt(searchParams.id));
+
+        if (!orderArticlesError) {
+            setOrderArticles(orderArticlesData);
+        }
+
+        setEditingArticle(null);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingArticle(null);
+    };
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-8">
@@ -180,17 +225,75 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                             {orderArticles.map((orderArticle) => (
                                 <div key={`${orderArticle.id_order}-${orderArticle.id_article}`} className="bg-gray-50 rounded-lg p-4">
                                     <h3 className="font-semibold text-gray-800">{orderArticle.article?.name}</h3>
-                                    <div className="mt-2 space-y-1">
-                                        <p className="text-sm text-gray-600">Lots: {orderArticle.quantity}</p>
-                                        <p className="text-sm text-gray-600">Quantité totale: {orderArticle.quantity * 2000}</p>
-                                        <p className="text-sm text-gray-600">Prix unitaire: {orderArticle.price}€</p>
-                                        <p className="text-sm text-gray-600">Prix total: {orderArticle.price * orderArticle.quantity * 2000}€</p>
-                                    </div>
-                                    <button className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
-                                        onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
-                                    >
-                                         Supprimer l'article
-                                    </button>
+                                    {editingArticle && 
+                                     editingArticle.id_order === orderArticle.id_order && 
+                                     editingArticle.id_article === orderArticle.id_article ? (
+                                        <div className="mt-4 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input 
+                                                    type="number" 
+                                                    name="price" 
+                                                    placeholder="Prix"
+                                                    value={editingArticle.price.toString()}
+                                                    onChange={(e) => setEditingArticle({
+                                                        ...editingArticle,
+                                                        price: parseFloat(e.target.value) || 0
+                                                    })}
+                                                />
+                                                <Input 
+                                                    type="number" 
+                                                    name="quantity" 
+                                                    placeholder="Nombre de lots"
+                                                    value={editingArticle.quantity.toString()}
+                                                    onChange={(e) => setEditingArticle({
+                                                        ...editingArticle,
+                                                        quantity: parseFloat(e.target.value) || 0
+                                                    })}
+                                                />
+                                            </div>
+                                            <div className="text-sm space-y-1">
+                                                <p className="text-gray-600">Quantité totale: {editingArticle.quantity * 2000}</p>
+                                                <p className="text-gray-600">Prix total: {editingArticle.price * editingArticle.quantity * 2000}€</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={handleUpdateArticle}
+                                                    className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                                                >
+                                                    Confirmer
+                                                </button>
+                                                <button 
+                                                    onClick={handleCancelEdit}
+                                                    className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition-colors"
+                                                >
+                                                    Annuler
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="mt-2 space-y-1">
+                                                <p className="text-sm text-gray-600">Lots: {orderArticle.quantity}</p>
+                                                <p className="text-sm text-gray-600">Quantité totale: {orderArticle.quantity * 2000}</p>
+                                                <p className="text-sm text-gray-600">Prix unitaire: {orderArticle.price}€</p>
+                                                <p className="text-sm text-gray-600">Prix total: {orderArticle.price * orderArticle.quantity * 2000}€</p>
+                                            </div>
+                                            <div className="mt-4 flex gap-2">
+                                                <button 
+                                                    onClick={() => handleEditArticle(orderArticle)}
+                                                    className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                                                >
+                                                    Modifier
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
+                                                    className="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+                                                >
+                                                    Supprimer
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))}
                         </div>
