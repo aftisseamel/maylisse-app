@@ -16,6 +16,7 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [dateFilter, setDateFilter] = useState<string>('all');
    
 
     useEffect(() => {
@@ -58,10 +59,31 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
         fetchClientData();
     }, [resolvedParams.name]);
 
-    // Filtrer les commandes en fonction du statut sélectionné
-    const filteredOrders = orders.filter(order => 
-        statusFilter === 'all' || order.status === statusFilter
-    );
+    // Filtrer les commandes en fonction du statut et de la date
+    const filteredOrders = orders.filter(order => {
+        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+        const orderDate = order.created_at ? new Date(order.created_at) : new Date();
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const lastWeek = new Date(today);
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        const lastMonth = new Date(today);
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+        let matchesDate = true;
+        if (dateFilter === 'today') {
+            matchesDate = orderDate.toDateString() === today.toDateString();
+        } else if (dateFilter === 'yesterday') {
+            matchesDate = orderDate.toDateString() === yesterday.toDateString();
+        } else if (dateFilter === 'lastWeek') {
+            matchesDate = orderDate >= lastWeek;
+        } else if (dateFilter === 'lastMonth') {
+            matchesDate = orderDate >= lastMonth;
+        }
+
+        return matchesStatus && matchesDate;
+    });
 
     if (isLoading) {
         return <div>Chargement...</div>;
@@ -104,19 +126,32 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Commandes du client</h2>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                            <option value="all">Tous les statuts</option>
-                            <option value="initiated">Initiated</option>
-                            <option value="preparation">En préparation</option>
-                            <option value="prepared">Préparées</option>
-                            <option value="delivering">En livraison</option>
-                            <option value="delivered">Livrées</option>
-                            <option value="finished">Terminées</option>
-                        </select>
+                        <div className="flex gap-4">
+                            <select
+                                value={dateFilter}
+                                onChange={(e) => setDateFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="all">Toutes les dates</option>
+                                <option value="today">Aujourd'hui</option>
+                                <option value="yesterday">Hier</option>
+                                <option value="lastWeek">7 derniers jours</option>
+                                <option value="lastMonth">30 derniers jours</option>
+                            </select>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="all">Tous les statuts</option>
+                                <option value="initiated">Initiated</option>
+                                <option value="preparation">En préparation</option>
+                                <option value="prepared">Préparées</option>
+                                <option value="delivering">En livraison</option>
+                                <option value="delivered">Livrées</option>
+                                <option value="finished">Terminées</option>
+                            </select>
+                        </div>
                     </div>
                     {filteredOrders.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
