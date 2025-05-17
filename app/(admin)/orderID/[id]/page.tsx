@@ -78,7 +78,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     }
 
     const handleSubmitAddArticle = async () => {
-        if (!formData.price || !formData.quantity) {
+        if (formData.price === 0 || formData.quantity === 0) {
             alert('Veuillez remplir tous les champs');
             return;
         }
@@ -91,7 +91,13 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         });
 
         const response = await insertOrderArticle(formDataObj);
+        
         console.log(response);
+        if (response.success) {
+            alert('Article ajouté avec succès');
+        } else {
+            alert('l\'article existe peut etre deja dans la commande');
+        }
     }
 
     return (
@@ -154,7 +160,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                     type='submit' 
                                     onClick={() => handleSubmitAddArticle()}
                                     className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                                    disabled={!formData.price || !formData.quantity}
                                 >
                                     Confirmer l'ajout
                                 </button>
