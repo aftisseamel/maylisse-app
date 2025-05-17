@@ -127,6 +127,27 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         }
     }
 
+    const handleDeleteArticle = async (id_order: number, id_article: number) => {
+        const supabase = createClient();
+        const { error: orderArticlesError } = await supabase
+            .from('order_article')
+            .delete()
+            .eq('id_order', id_order)
+            .eq('id_article', id_article);
+
+        if (orderArticlesError) {
+            console.error('Error deleting article:', orderArticlesError);
+        }
+        const { data: orderArticlesData, error: orderArticlesError2 } = await supabase
+                .from('order_article')
+                .select('*, article(*)')
+                .eq('id_order', parseInt(searchParams.id));
+
+            if (!orderArticlesError2) {
+                setOrderArticles(orderArticlesData);
+            }   
+    }
+
     return (
         <div className="p-6 max-w-7xl mx-auto">
             <div className="mb-8">
@@ -165,6 +186,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                         <p className="text-sm text-gray-600">Prix unitaire: {orderArticle.price}€</p>
                                         <p className="text-sm text-gray-600">Prix total: {orderArticle.price * orderArticle.quantity * 2000}€</p>
                                     </div>
+                                    <button className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+                                        onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
+                                    >
+                                         Supprimer l'article
+                                    </button>
                                 </div>
                             ))}
                         </div>
