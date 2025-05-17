@@ -15,6 +15,7 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
     const [client, setClient] = useState<Tables<"client"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [statusFilter, setStatusFilter] = useState<string>('all');
    
 
     useEffect(() => {
@@ -57,6 +58,11 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
         fetchClientData();
     }, [resolvedParams.name]);
 
+    // Filtrer les commandes en fonction du statut sélectionné
+    const filteredOrders = orders.filter(order => 
+        statusFilter === 'all' || order.status === statusFilter
+    );
+
     if (isLoading) {
         return <div>Chargement...</div>;
     }
@@ -96,10 +102,25 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
 
                 {/* Liste des commandes */}
                 <div className="bg-white p-6 rounded-lg shadow-lg">
-                    <h2 className="text-xl font-bold mb-4">Commandes du client</h2>
-                    {orders.length > 0 ? (
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold">Commandes du client</h2>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="all">Tous les statuts</option>
+                            <option value="initiated">Initiated</option>
+                            <option value="preparation">En préparation</option>
+                            <option value="prepared">Préparées</option>
+                            <option value="delivering">En livraison</option>
+                            <option value="delivered">Livrées</option>
+                            <option value="finished">Terminées</option>
+                        </select>
+                    </div>
+                    {filteredOrders.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {orders.map((order) => (
+                            {filteredOrders.map((order) => (
                                 <div key={order.id} className="border rounded-lg p-4">
                                     <div className="flex justify-between items-start">
                                         <h3 className="font-bold">Commande #{order.id}</h3>
