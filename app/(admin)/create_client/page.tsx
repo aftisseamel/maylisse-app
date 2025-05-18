@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from './action';
 import { useTransition } from 'react';
+import NavigationBar from '@/app/components/NavigationBar';
 
 export default function Create_client() {
     const [isPending, startTransition] = useTransition();
@@ -18,6 +19,8 @@ export default function Create_client() {
     };
 
     return (
+        <div>
+            <NavigationBar />
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
             <h1 className="text-2xl font-bold text-center mb-6"> Créer un client </h1>
 
@@ -37,6 +40,7 @@ export default function Create_client() {
                     {isPending ? 'Création...' : 'Créer'}
                 </button>
             </form>
+        </div>
         </div>
     );
 }

@@ -5,6 +5,7 @@ import { Tables } from '@/database.types';
 import data_orders from '@/app/data_orders';
 import data_clients from '@/app/data_clients';
 import { useRouter } from 'next/navigation';
+import NavigationBar from '@/app/components/NavigationBar';
 
 import Link from 'next/link';
 
@@ -95,8 +96,11 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
 
 
     return (
+        <div>
+           <NavigationBar />
+        <div className="p-4"> 
+        
 
-        <div className="p-4">
             <div className="max-w-6xl mx-auto">
                 {/* En-tête avec informations du client */}
                 <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
@@ -209,5 +213,6 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                 </div>
             </div>
         </div>
+    </div>
     );
 } 

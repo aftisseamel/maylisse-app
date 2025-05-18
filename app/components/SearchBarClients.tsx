@@ -1,34 +1,43 @@
 "use client";
 
 import { Tables } from "@/database.types";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState, useEffect } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 
-const SearchBar = ({ clients }: { clients: Tables<"client">[] }) => {
-  const [activeSearch, setActiveSearch] = useState<Tables<"client">[]>([]);
+interface SearchBarClientsProps {
+  clients: Tables<"client">[];
+  onSearchResults: (results: Tables<"client">[]) => void;
+}
 
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value.trim().toLowerCase();
-    if (query === "") {
-      setActiveSearch([]);
+const SearchBarClients = ({ clients, onSearchResults }: SearchBarClientsProps) => {
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    if (query.trim() === '') {
+      onSearchResults(clients);
       return;
     }
-    setActiveSearch(
-        clients
-        .filter((client) => client.name.toLowerCase().includes(query))
-        .slice(0, 8)
+
+    const filtered = clients.filter(client =>
+      client.name.toLowerCase().includes(query.toLowerCase()) ||
+      (client.email?.toLowerCase() || '').includes(query.toLowerCase()) ||
+      (client.phone?.toLowerCase() || '').includes(query.toLowerCase()) ||
+      (client.address_client?.toLowerCase() || '').includes(query.toLowerCase())
     );
-  };
+
+    onSearchResults(filtered);
+  }, [query, clients, onSearchResults]);
 
   return (
     <div className="w-full max-w-xl mx-auto relative">
       {/* Barre de recherche */}
       <div className="relative">
         <input
-          type="search"
-          placeholder="Rechercher un article..."
-          className="w-full px-5 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-          onChange={handleSearch}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Rechercher un client..."
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <button
           type="button"
@@ -37,29 +46,8 @@ const SearchBar = ({ clients }: { clients: Tables<"client">[] }) => {
           <AiOutlineSearch size={20} />
         </button>
       </div>
-
-      {/* Résultats */}
-      {activeSearch.length > 0 && (
-        <div className="absolute top-16 w-full bg-white rounded-2xl shadow-lg p-4 mt-2 flex flex-col gap-4 z-10">
-          {activeSearch.map((client, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-all"
-            >
-              
-              {/* Infos */}
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-800">{client.name}</span>
-                <span className="text-sm text-gray-500">
-                    NOM : {client.name}   ID : {client.id} 
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };
 
-export default SearchBar;
+export default SearchBarClients;

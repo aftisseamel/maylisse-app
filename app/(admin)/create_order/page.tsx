@@ -8,6 +8,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Tables } from '@/database.types';
 import Select from '@/app/components/Select';
 import Input from '@/app/components/Input';
+import NavigationBar from '@/app/components/NavigationBar';
 
 export default function CreateOrder() {
     const router = useRouter();
@@ -15,6 +16,7 @@ export default function CreateOrder() {
     const [deliveryMen, setDeliveryMen] = useState<Tables<"delivery_man">[]>([]);
     const [clients, setClients] = useState<Tables<"client">[]>([]);
     const [error, setError] = useState<string | null>(null);
+    
     const [formData, setFormData] = useState({
         delivery_address: '',
         pseudo_delivery_man: '',
@@ -122,88 +124,91 @@ export default function CreateOrder() {
     ];
 
     return (
-        <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
-            <h1 className="text-2xl font-bold text-center mb-6">Créer une commande</h1>
+        <div>
+            <NavigationBar />
+            <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg">
+                <h1 className="text-2xl font-bold text-center mb-6">Créer une commande</h1>
 
-            {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-600">{error}</p>
-                </div>
-            )}
+                {error && (
+                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-red-600">{error}</p>
+                    </div>
+                )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <Input 
-                    name="delivery_address" 
-                    label="Adresse de livraison"
-                    placeholder="Adresse de livraison" 
-                    required 
-                    value={formData.delivery_address}
-                    onChange={handleInputChange}
-                />
-                
-                <Select
-                    name="pseudo_delivery_man"
-                    label="Livreur"
-                    options={deliveryMen.map(dm => ({
-                        value: dm.pseudo_delivery_man,
-                        label: dm.pseudo_delivery_man
-                    }))}
-                    required
-                    searchable
-                    value={formData.pseudo_delivery_man}
-                    onChange={handleSelectChange}
-                />
-
-                <Select
-                    name="name_client"
-                    label="Client"
-                    options={clients.map(client => ({
-                        value: client.name,
-                        label: client.name
-                    }))}
-                    required
-                    searchable
-                    value={formData.name_client}
-                    onChange={handleSelectChange}
-                />
-
-                <div className="w-full">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
-                    </label>
-                    <textarea
-                        name="description_order"
-                        placeholder="Description de la commande"
-                        required
-                        value={formData.description_order}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <Input 
+                        name="delivery_address" 
+                        label="Adresse de livraison"
+                        placeholder="Adresse de livraison" 
+                        required 
+                        value={formData.delivery_address}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all min-h-[100px]"
                     />
-                </div>
+                    
+                    <Select
+                        name="pseudo_delivery_man"
+                        label="Livreur"
+                        options={deliveryMen.map(dm => ({
+                            value: dm.pseudo_delivery_man,
+                            label: dm.pseudo_delivery_man
+                        }))}
+                        required
+                        searchable
+                        value={formData.pseudo_delivery_man}
+                        onChange={handleSelectChange}
+                    />
 
-                <Select
-                    name="status"
-                    label="Statut"
-                    options={statusOptions}
-                    required
-                    value={formData.status}
-                    onChange={handleSelectChange}
-                />
+                    <Select
+                        name="name_client"
+                        label="Client"
+                        options={clients.map(client => ({
+                            value: client.name,
+                            label: client.name
+                        }))}
+                        required
+                        searchable
+                        value={formData.name_client}
+                        onChange={handleSelectChange}
+                    />
 
-                <button
-                    type="submit"
-                    disabled={isPending}
-                    className={`w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all ${
-                        isPending ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                >
-                    {isPending ? 'Création...' : 'Créer'}
-                </button>
-            </form>
+                    <div className="w-full">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                        </label>
+                        <textarea
+                            name="description_order"
+                            placeholder="Description de la commande"
+                            required
+                            value={formData.description_order}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all min-h-[100px]"
+                        />
+                    </div>
 
-            <Link href="/order" className="text-indigo-600 hover:underline mt-4 block text-center">
-                Retour à la liste des commandes
-            </Link>
+                    <Select
+                        name="status"
+                        label="Statut"
+                        options={statusOptions}
+                        required
+                        value={formData.status}
+                        onChange={handleSelectChange}
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={isPending}
+                        className={`w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all ${
+                            isPending ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                    >
+                        {isPending ? 'Création...' : 'Créer'}
+                    </button>
+                </form>
+
+                <Link href="/order" className="text-indigo-600 hover:underline mt-4 block text-center">
+                    Retour à la liste des commandes
+                </Link>
+            </div>
         </div>
     );
 }
