@@ -196,9 +196,7 @@ export default function CreateOrder() {
                     <button
                         type="submit"
                         disabled={isPending}
-                        className={`w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all ${
-                            isPending ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        className="w-full gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-all duration-200"
                     >
                         {isPending ? 'Création...' : 'Créer'}
                     </button>
