@@ -17,6 +17,7 @@ export default function Page() {
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [deliveryMen, setDeliveryMen] = useState<{ pseudo_delivery_man: string }[]>([]);
     const [clients, setClients] = useState<{ name: string }[]>([]);
+    const [orderArticles, setOrderArticles] = useState<{ [key: number]: (Tables<"order_article"> & { article: Tables<"article"> | null })[] }>({});
 
     const [editOrderId, setEditOrderId] = useState<number | null>(null);
     const [editedOrderData, setEditedOrderData] = useState<Partial<Tables<"order">>>({});
@@ -51,6 +52,32 @@ export default function Page() {
                     console.error('Error fetching clients:', clientsError);
                 } else {
                     setClients(clientsData || []);
+                }
+
+                // Récupérer les articles pour les commandes en préparation ou plus
+                const preparationAndAfter = ['preparation', 'prepared', 'delivering', 'delivered', 'finished'];
+                const ordersToFetch = data.filter(order => preparationAndAfter.includes(order.status));
+                
+                if (ordersToFetch.length > 0) {
+                    const { data: articlesData, error } = await supabase
+                        .from('order_article')
+                        .select('*, article(*)')
+                        .in('id_order', ordersToFetch.map(order => order.id));
+
+                    if (error) {
+                        console.error('Error fetching order articles:', error);
+                    } else {
+                        // Organiser les articles par commande
+                        const articlesByOrder = articlesData.reduce((acc, item) => {
+                            if (!acc[item.id_order]) {
+                                acc[item.id_order] = [];
+                            }
+                            acc[item.id_order].push(item);
+                            return acc;
+                        }, {} as { [key: number]: (Tables<"order_article"> & { article: Tables<"article"> | null })[] });
+                        
+                        setOrderArticles(articlesByOrder);
+                    }
                 }
             } catch (err) {
                 console.error('Error:', err);
@@ -351,6 +378,22 @@ export default function Page() {
                                                 >
                                                     Détails de la commande
                                                 </button>
+                                            </div>
+                                        )}
+                                        {['preparation', 'prepared', 'delivering', 'delivered', 'finished'].includes(order.status) && orderArticles[order.id] && (
+                                            <div className="mt-4 pt-4 border-t border-gray-200">
+                                                <h4 className="font-semibold text-gray-700 mb-2">Articles de la commande :</h4>
+                                                <div className="space-y-2">
+                                                    {orderArticles[order.id].map((orderArticle) => (
+                                                        <div key={`${orderArticle.id_order}-${orderArticle.id_article}`} className="bg-gray-50 p-2 rounded">
+                                                            <p className="text-sm">
+                                                                <span className="font-medium">{orderArticle.article?.name}</span>
+                                                                <span className="text-gray-600"> - {orderArticle.quantity} lots</span>
+                                                                <span className="text-gray-600"> - {orderArticle.price}€/lot</span>
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
                                     </>

@@ -6,6 +6,7 @@ import data_orders from '@/app/datas/data_orders';
 import data_clients from '@/app/datas/data_clients';
 import { useRouter } from 'next/navigation';
 import NavigationBar from '@/app/components/NavigationBar';
+import { createClient } from '@supabase/supabase-js';
 
 import Link from 'next/link';
 
@@ -18,6 +19,7 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
     const [isLoading, setIsLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [dateFilter, setDateFilter] = useState<string>('all');
+    const [orderArticles, setOrderArticles] = useState<{ [key: number]: (Tables<"order_article"> & { article: Tables<"article"> | null })[] }>({});
    
 
     useEffect(() => {
@@ -46,6 +48,35 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                 });
                 setOrders(sortedOrders);
 
+                // Récupérer les articles pour les commandes en préparation ou plus
+                const supabase = createClient(
+                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+                );
+                const preparationAndAfter = ['preparation', 'prepared', 'delivering', 'delivered', 'finished'];
+                const ordersToFetch = clientOrders.filter(order => preparationAndAfter.includes(order.status));
+                
+                if (ordersToFetch.length > 0) {
+                    const { data: articlesData, error } = await supabase
+                        .from('order_article')
+                        .select('*, article(*)')
+                        .in('id_order', ordersToFetch.map(order => order.id));
+
+                    if (error) {
+                        console.error('Error fetching order articles:', error);
+                    } else {
+                        // Organiser les articles par commande
+                        const articlesByOrder = articlesData.reduce((acc, item) => {
+                            if (!acc[item.id_order]) {
+                                acc[item.id_order] = [];
+                            }
+                            acc[item.id_order].push(item);
+                            return acc;
+                        }, {} as { [key: number]: (Tables<"order_article"> & { article: Tables<"article"> | null })[] });
+                        
+                        setOrderArticles(articlesByOrder);
+                    }
+                }
 
             } catch (error) {
                 console.error('Error:', error);
@@ -183,19 +214,30 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                                     {order.status === 'initiated' && (
                                         <div>
                                             <button className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                                            onClick={
-                                                () => {
-                                                    console.log("Ajouter des articles à la commande")
-                                                    const orderId = order.id;
-                                                    
-                                                    router.push(`/orderID/${orderId}`)
-                                                }
-
-                                            }
-                                            >
+                                            onClick={() => {
+                                                console.log("Ajouter des articles à la commande")
+                                                const orderId = order.id;
+                                                router.push(`/orderID/${orderId}`)
+                                            }}>
                                                 <p> Ajouter des articles à la commande </p>
-                                                
                                             </button>
+                                        </div>
+                                    )}
+
+                                    {['preparation', 'prepared', 'delivering', 'delivered', 'finished'].includes(order.status) && orderArticles[order.id] && (
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <h4 className="font-semibold text-gray-700 mb-2">Articles de la commande :</h4>
+                                            <div className="space-y-2">
+                                                {orderArticles[order.id].map((orderArticle) => (
+                                                    <div key={`${orderArticle.id_order}-${orderArticle.id_article}`} className="bg-gray-50 p-2 rounded">
+                                                        <p className="text-sm">
+                                                            <span className="font-medium">{orderArticle.article?.name}</span>
+                                                            <span className="text-gray-600"> - {orderArticle.quantity} lots</span>
+                                                            <span className="text-gray-600"> - {orderArticle.price}€/lot</span>
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                     
