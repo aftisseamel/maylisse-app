@@ -13,7 +13,7 @@ export default function Page() {
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-
+    const [statusFilter, setStatusFilter] = useState<string>('all');
 
     // Charger les commandes au démarrage
     useEffect(() => {
@@ -31,10 +31,23 @@ export default function Page() {
         fetchOrders();
     }, []);
 
-    // Mettre à jour les commandes filtrées quand on recherche
+    // Mettre à jour les commandes filtrées quand on recherche ou change le filtre
     const handleSearchResults = useCallback((results: Tables<"order">[]) => {
-        setFilteredOrders(results);
-    }, []);
+        const filtered = results.filter(order => 
+            statusFilter === 'all' || order.status === statusFilter
+        );
+        setFilteredOrders(filtered);
+    }, [statusFilter]);
+
+    // Mettre à jour le filtre de statut
+    const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newStatus = e.target.value;
+        setStatusFilter(newStatus);
+        const filtered = orders.filter(order => 
+            newStatus === 'all' || order.status === newStatus
+        );
+        setFilteredOrders(filtered);
+    };
 
     if (isLoading) {
         return <div>Chargement...</div>;
@@ -72,6 +85,19 @@ export default function Page() {
                             <div className="w-full md:w-80">
                                 <SearchBarOrders orders={orders} onSearchResults={handleSearchResults} />
                             </div>
+                            <select
+                                value={statusFilter}
+                                onChange={handleStatusFilterChange}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            >
+                                <option value="all">Tous les statuts</option>
+                                <option value="initiated">Initiated</option>
+                                <option value="preparation">En préparation</option>
+                                <option value="prepared">Préparées</option>
+                                <option value="delivering">En livraison</option>
+                                <option value="delivered">Livrées</option>
+                                <option value="finished">Terminées</option>
+                            </select>
                             <Link
                                 href="/create_order"
                                 className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
