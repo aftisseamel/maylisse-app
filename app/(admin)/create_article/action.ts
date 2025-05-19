@@ -9,7 +9,7 @@ export async function createArticle(formData: FormData) {
     const supabase = await createClient()
     
     const data = {
-        name : formData.get('name') as string, // <-- Ici on enregistre bien le "name" attendu par Supabase
+        name : formData.get('name') as string, 
         price: parseFloat(formData.get('price') as string) || 0,
         quantity: parseInt(formData.get('quantity') as string, 10) || 0,
         description: formData.get('description') as string,

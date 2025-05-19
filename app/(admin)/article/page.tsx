@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
 import SearchBar from "../../components/SearchBarArticles";
-import data_articles from "../../data_articles";
+import data_articles from "../../datas/data_articles";
 import { createClient } from '@/utils/supabase/client';
 import NavigationBar from '@/app/components/NavigationBar';
 
@@ -15,7 +15,6 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [quantityChanges, setQuantityChanges] = useState<{ [key: number]: number }>({});
 
-  // Charger les articles au démarrage
   useEffect(() => {
     const fetchArticles = async () => {
       try {
@@ -31,12 +30,10 @@ export default function Page() {
     fetchArticles();
   }, []);
 
-  // Mettre à jour les articles filtrés quand on les recherche
   const handleSearchResults = (results: Tables<"article">[]) => {
     setFilteredArticles(results);
   };
 
-  // Modifier la quantité d'un article
   const updateQuantity = async (articleId: number, change: number) => {
     const currentQuantity = articles.find(a => a.id === articleId)?.quantity || 0;
     const newQuantity = currentQuantity + change;
@@ -52,7 +49,6 @@ export default function Page() {
 
       if (error) throw error;
 
-      // Mettre à jour l'état local
       setArticles(articles.map(article => 
         article.id === articleId ? { ...article, quantity: newQuantity } : article
       ));
@@ -64,7 +60,6 @@ export default function Page() {
     }
   };
 
-  // Réinitialiser la quantité d'un article à 0
   const resetQuantity = async (articleId: number) => {
     try {
       const supabase = createClient();
@@ -75,7 +70,6 @@ export default function Page() {
 
       if (error) throw error;
 
-      // Mettre à jour l'état local
       setArticles(articles.map(article => 
         article.id === articleId ? { ...article, quantity: 0 } : article
       ));
@@ -87,7 +81,6 @@ export default function Page() {
     }
   };
 
-  // Gérer le changement de valeur dans l'input
   const handleQuantityChange = (articleId: number, value: string) => {
     const numValue = parseInt(value) || 0;
     setQuantityChanges(prev => ({
@@ -103,10 +96,8 @@ export default function Page() {
   return (
     <div>
       <NavigationBar />
-      {/* Main Content */}
       <div className="p-4">
         <div className="max-w-6xl mx-auto">
-          {/* En-tête avec titre et recherche */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
             <h1 className="text-2xl font-bold">Articles</h1>
             <div className="w-full md:w-80">
@@ -114,7 +105,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Liste des articles */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredArticles.map((article) => (
               <div key={article.id} className="bg-white p-4 rounded-lg shadow">
@@ -153,12 +143,10 @@ export default function Page() {
             ))}
           </div>
 
-          {/* Message si aucun article */}
           {filteredArticles.length === 0 && (
             <p className="text-center py-4">Aucun article trouvé</p>
           )}
 
-          {/* Bouton de création */}
           <div className="text-center mt-6">
             <Link
               href="/create_article"

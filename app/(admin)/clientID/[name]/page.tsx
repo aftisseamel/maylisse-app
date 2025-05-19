@@ -2,8 +2,8 @@
 
 import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
-import data_orders from '@/app/data_orders';
-import data_clients from '@/app/data_clients';
+import data_orders from '@/app/datas/data_orders';
+import data_clients from '@/app/datas/data_clients';
 import { useRouter } from 'next/navigation';
 import NavigationBar from '@/app/components/NavigationBar';
 
@@ -23,18 +23,15 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
     useEffect(() => {
         const fetchClientData = async () => {
             try {                
-                // Récupérer les informations du client
                 const clients = await data_clients();
                 console.log("clients : ", clients)
                 
                 const client = clients.find(c => c.name === decodeURIComponent(resolvedParams.name));
                 setClient(client || null);
 
-                // Récupérer les commandes du client
                 const orders = await data_orders();
                 const clientOrders = orders.filter(o => o.name_client === decodeURIComponent(resolvedParams.name));
 
-                // Trier les commandes par statut
                 const sortedOrders = clientOrders.sort((a, b) => {
                     const statusOrder = {
                         'initiated': 1,
@@ -60,7 +57,6 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
         fetchClientData();
     }, [resolvedParams.name]);
 
-    // Filtrer les commandes en fonction du statut et de la date
     const filteredOrders = orders.filter(order => {
         const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
         const orderDate = order.created_at ? new Date(order.created_at) : new Date();
@@ -102,7 +98,6 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
         
 
             <div className="max-w-6xl mx-auto">
-                {/* En-tête avec informations du client */}
                 <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
                     <div className="flex justify-between items-start">
                         <div>

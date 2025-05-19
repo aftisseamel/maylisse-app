@@ -1,11 +1,8 @@
 'use server'
 
-import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/server';
 
-const data_delivery_men = async () : Promise<Tables<"delivery_man">[]> => {
-
-    
+export async function data_delivery_men() {
     try {
         const supabase = await createClient();
         const { data, error } = await supabase
@@ -14,14 +11,13 @@ const data_delivery_men = async () : Promise<Tables<"delivery_man">[]> => {
             .order('pseudo_delivery_man', { ascending: true });
 
         if (error) {
-            console.error('Error:', error);
+            console.error('Error fetching delivery men:', error);
             return [];
         }
 
-        return data
-
+        return data || [];
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in data_delivery_men:', error);
         return [];
     }
 }

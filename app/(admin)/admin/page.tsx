@@ -19,7 +19,6 @@ export default function AdminPage() {
       try {
         const supabase = createClient();
         
-        // Récupérer les statistiques
         const [articles, clients, orders, livreurs] = await Promise.all([
           supabase.from('article').select('id', { count: 'exact' }),
           supabase.from('client').select('id', { count: 'exact' }),
@@ -53,22 +52,17 @@ export default function AdminPage() {
 
   return (
     <div>
-      {/* Navigation Bar */}
       <NavigationBar />
 
 
-      {/* Main Content */}
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* En-tête */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <h1 className="text-3xl font-bold text-gray-800 mb-2">Tableau de bord</h1>
             <p className="text-gray-600">Bienvenue dans votre espace d'administration</p>
           </div>
 
-          {/* Statistiques */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {/* Articles */}
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Articles</h3>
@@ -85,7 +79,6 @@ export default function AdminPage() {
               </Link>
             </div>
 
-            {/* Clients */}
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Clients</h3>
@@ -102,7 +95,6 @@ export default function AdminPage() {
               </Link>
             </div>
 
-            {/* Commandes */}
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Commandes</h3>
@@ -119,7 +111,6 @@ export default function AdminPage() {
               </Link>
             </div>
 
-            {/* Livreurs */}
             <div className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Livreurs</h3>
@@ -137,7 +128,6 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* Actions rapides */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Actions rapides</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

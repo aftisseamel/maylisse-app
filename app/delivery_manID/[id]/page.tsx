@@ -3,10 +3,11 @@
 import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/client';
-import data_orders from '@/app/data_orders';
+import data_orders from '@/app/datas/data_orders';
+import Link from 'next/link';
 
 export default function DeliveryManPage({ params }: { params: Promise<{ id: string }> }) {
-    const resolvedParams = use(params);
+    const idDelieveryMan = parseInt(use(params).id);
     const [deliveryMan, setDeliveryMan] = useState<Tables<"delivery_man"> | null>(null);
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +39,6 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 throw error;
             }
 
-            // Mettre à jour la liste des commandes
             const allOrders = await data_orders();
             const deliveryManOrders = allOrders.filter(o => 
                 o.pseudo_delivery_man === deliveryMan?.pseudo_delivery_man && 
@@ -64,17 +64,15 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
             try {
                 const supabase = createClient();
                 
-                // Récupérer les informations du livreur
                 const { data: deliveryManData, error: deliveryManError } = await supabase
                     .from('delivery_man')
                     .select('*')
-                    .eq('id', parseInt(resolvedParams.id))
+                    .eq('id', idDelieveryMan)
                     .single();
 
                 if (deliveryManError) throw deliveryManError;
                 setDeliveryMan(deliveryManData);
 
-                // Récupérer les commandes du livreur avec status 'prepared' ou 'delivering'
                 const allOrders = await data_orders();
                 const deliveryManOrders = allOrders.filter(o => 
                     o.pseudo_delivery_man === deliveryManData.pseudo_delivery_man && 
@@ -90,9 +88,8 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
         };
 
         fetchDeliveryManData();
-    }, [resolvedParams.id]);
+    }, [idDelieveryMan]);
 
-    // Filtrer les commandes en fonction du statut sélectionné
     const filteredOrders = orders.filter(order => 
         statusFilter === 'all' || order.status === statusFilter
     );
@@ -119,7 +116,6 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* En-tête */}
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                         Commandes à livrer par {deliveryMan.pseudo_delivery_man}
@@ -128,9 +124,14 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                         <p>{deliveryMan.email}</p>
                         {deliveryMan.phone && <p>• {deliveryMan.phone}</p>}
                     </div>
-                </div>
 
-                {/* Filtre de statut */}
+                </div>
+                <div className="mb-4">
+                    <Link href = {`/ready_to_deliever/${idDelieveryMan}`} className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Prendre en compte une nouvelle commande
+                    </Link>
+
+                </div>
                 <div className="mb-6">
                     <select
                         value={statusFilter}
@@ -145,7 +146,6 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                     </select>
                 </div>
 
-                {/* Liste des commandes */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredOrders.map((order) => (
                         <div key={order.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
@@ -223,7 +223,9 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                             </div>
                         </div>
                     ))}
+
                 </div>
+
 
                 {orders.length === 0 && (
                     <div className="text-center py-12">

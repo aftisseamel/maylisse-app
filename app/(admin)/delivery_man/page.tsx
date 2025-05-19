@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client';
 import NavigationBar from '@/app/components/NavigationBar';
 
 export default function DeliveryManPage() {
+
   const [deliveryMen, setDeliveryMen] = useState<Tables<"delivery_man">[]>([]);
   const [filteredDeliveryMen, setFilteredDeliveryMen] = useState<Tables<"delivery_man">[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,7 +35,6 @@ export default function DeliveryManPage() {
     fetchDeliveryMen();
   }, []);
 
-  // Filtrer les livreurs
   useEffect(() => {
     const filtered = deliveryMen.filter(deliveryMan =>
       deliveryMan.pseudo_delivery_man?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -45,7 +45,6 @@ export default function DeliveryManPage() {
     setFilteredDeliveryMen(filtered);
   }, [searchTerm, deliveryMen]);
 
-  // Toggle le statut du livreur
   const toggleStatus = async (id: number, currentStatus: 'available' | 'unavailable') => {
     try {
       const supabase = createClient();
@@ -58,7 +57,6 @@ export default function DeliveryManPage() {
 
       if (error) throw error;
 
-      // Mettre à jour l'état local
       setDeliveryMen(deliveryMen.map(dm => 
         dm.id === id ? { ...dm, status: newStatus } : dm
       ));
@@ -83,7 +81,6 @@ export default function DeliveryManPage() {
       <NavigationBar />
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* En-tête avec titre, recherche et bouton de création */}
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-3">
@@ -111,7 +108,6 @@ export default function DeliveryManPage() {
             </div>
           </div>
 
-          {/* Liste des livreurs */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDeliveryMen.map((deliveryMan) => (
               <div key={deliveryMan.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
@@ -153,7 +149,6 @@ export default function DeliveryManPage() {
             ))}
           </div>
 
-          {/* Message si aucun livreur */}
           {filteredDeliveryMen.length === 0 && (
             <div className="text-center py-12 bg-white rounded-lg shadow-sm">
               <p className="text-gray-500 text-lg">Aucun livreur trouvé</p>

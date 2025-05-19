@@ -64,7 +64,6 @@ export default function CreateOrder() {
         event.preventDefault();
         setError(null);
 
-        // Vérifier que tous les champs requis sont remplis
         if (!formData.description_order.trim()) {
             setError('La description de la commande est requise');
             return;
@@ -82,7 +81,7 @@ export default function CreateOrder() {
 
         const formDataObj = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
-            if (value) { // Ne pas envoyer les valeurs vides
+            if (value) { 
                 formDataObj.append(key, value);
             }
         });
@@ -109,7 +108,7 @@ export default function CreateOrder() {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value || null // Convertir les chaînes vides en null
+            [name]: value || null 
         }));
     };
 

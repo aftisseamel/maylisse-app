@@ -1,6 +1,5 @@
 'use server'
 import { createClient } from "@/utils/supabase/server";
-import { Tables } from "@/database.types";
 import { revalidatePath } from "next/cache";
 export async function insertOrderArticle(formData: FormData) {
     try {

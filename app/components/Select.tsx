@@ -97,7 +97,6 @@ export default function Select({ label, error, options, searchable = false, clas
           </div>
         )}
       </div>
-      {/* Hidden input to store the selected value for form submission */}
       <input
         type="hidden"
         name={props.name}

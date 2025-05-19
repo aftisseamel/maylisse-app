@@ -5,7 +5,7 @@ import { Tables } from '@/database.types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import SearchBarOrders from "../../components/SearchBarOrders";
-import { data_orders } from '@/app/data_orders';
+import { data_orders } from '@/app/datas/data_orders';
 import NavigationBar from '@/app/components/NavigationBar';
 import { createClient } from '@/utils/supabase/client';
 export default function Page() {
@@ -15,7 +15,6 @@ export default function Page() {
     const [isLoading, setIsLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState<string>('all');
 
-    // Charger les commandes au démarrage
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -31,7 +30,6 @@ export default function Page() {
         fetchOrders();
     }, []);
 
-    // Mettre à jour les commandes filtrées quand on recherche ou change le filtre
     const handleSearchResults = useCallback((results: Tables<"order">[]) => {
         const filtered = results.filter(order => 
             statusFilter === 'all' || order.status === statusFilter
@@ -39,7 +37,6 @@ export default function Page() {
         setFilteredOrders(filtered);
     }, [statusFilter]);
 
-    // Mettre à jour le filtre de statut
     const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newStatus = e.target.value;
         setStatusFilter(newStatus);
@@ -91,12 +88,13 @@ export default function Page() {
                                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             >
                                 <option value="all">Tous les statuts</option>
-                                <option value="initiated">Initiated</option>
+                                <option value="initiated">Initialisée</option>
                                 <option value="preparation">En préparation</option>
-                                <option value="prepared">Préparées</option>
+                                <option value="prepared">Préparée</option>
                                 <option value="delivering">En livraison</option>
-                                <option value="delivered">Livrées</option>
-                                <option value="finished">Terminées</option>
+                                <option value="delivered">Livrée</option>
+                                <option value="finished">Terminée</option>
+                                <option value="canceled">Annulée</option>
                             </select>
                             <Link
                                 href="/create_order"
@@ -120,7 +118,8 @@ export default function Page() {
                                         order.status === 'delivering' ? 'bg-orange-100 text-orange-800' :
                                         order.status === 'delivered' ? 'bg-green-100 text-green-800' :
                                         order.status === 'finished' ? 'bg-gray-100 text-gray-800' :
-                                        'bg-red-100 text-red-800'}`}>
+                                        order.status === 'canceled' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800'}`}>
                                         {order.status}
                                     </span>
                                 </div>

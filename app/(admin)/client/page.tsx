@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
 import SearchBarClients from "../../components/SearchBarClients";
-import data_clients from "../../data_clients";
+import data_clients from "../../datas/data_clients";
 import NavigationBar from '@/app/components/NavigationBar';
 
 export default function Page() {
@@ -12,7 +12,6 @@ export default function Page() {
   const [filteredClients, setFilteredClients] = useState<Tables<"client">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger les clients au démarrage
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -28,7 +27,6 @@ export default function Page() {
     fetchClients();
   }, []);
 
-  // Mettre à jour les clients filtrés quand on les recherche
   const handleSearchResults = (results: Tables<"client">[]) => {
     setFilteredClients(results);
   };
@@ -40,10 +38,8 @@ export default function Page() {
   return (
     <div>
       <NavigationBar />
-      {/* Main Content */}
       <div className="p-4">
         <div className="max-w-6xl mx-auto">
-          {/* En-tête avec titre et recherche */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
             <h1 className="text-2xl font-bold">Clients</h1>
             <div className="w-full md:w-80">
@@ -51,7 +47,6 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Liste des clients */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredClients.map((client) => (
               <div key={client.id} className="bg-white p-4 rounded-lg shadow">
@@ -73,12 +68,10 @@ export default function Page() {
             ))}
           </div>
 
-          {/* Message si aucun client */}
           {filteredClients.length === 0 && (
             <p className="text-center py-4">Aucun client trouvé</p>
           )}
 
-          {/* Bouton de création */}
           <div className="text-center mt-6">
             <Link
               href="/create_client"

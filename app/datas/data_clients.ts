@@ -2,7 +2,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { Tables } from "@/database.types";
-import { redirect } from "next/navigation";
 
 
 const data_clients = async () : Promise<Tables<"client"> []>  => {
