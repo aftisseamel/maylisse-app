@@ -194,11 +194,6 @@ export default function Page() {
                           className="inline-flex items-center gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-all duration-200"
                         >
                           Voir les commandes
-                          {clientOrders[client.name] && clientOrders[client.name].length > 0 && (
-                            <span className="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full text-xs font-medium">
-                              {clientOrders[client.name].length}
-                            </span>
-                          )}
                         </Link>
                       </div>
 
