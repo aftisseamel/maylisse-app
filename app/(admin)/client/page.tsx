@@ -42,8 +42,17 @@ export default function Page() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
             <h1 className="text-2xl font-bold">Clients</h1>
-            <div className="w-full md:w-80">
-              <SearchBarClients clients={clients} onSearchResults={handleSearchResults} />
+            <div className="flex items-center gap-4">
+              <div className="w-full md:w-80">
+                <SearchBarClients clients={clients} onSearchResults={handleSearchResults} />
+              </div>
+              <Link
+                href="/create_client"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+              >
+                <span className="text-xl">+</span>
+                <span>Créer un client</span>
+              </Link>
             </div>
           </div>
 
@@ -71,15 +80,6 @@ export default function Page() {
           {filteredClients.length === 0 && (
             <p className="text-center py-4">Aucun client trouvé</p>
           )}
-
-          <div className="text-center mt-6">
-            <Link
-              href="/create_client"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              Créer un client
-            </Link>
-          </div>
         </div>
       </div>
     </div>

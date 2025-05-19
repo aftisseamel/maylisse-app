@@ -202,8 +202,9 @@ export default function Page() {
                             </select>
                             <Link
                                 href="/create_order"
-                                className="w-full md:w-auto bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
-                            >
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+                                >
+                                <span className="text-xl">+</span>
                                 <span>Créer une commande</span>
                             </Link>
                         </div>

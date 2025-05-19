@@ -14,6 +14,8 @@ export default function Page() {
   const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [quantityChanges, setQuantityChanges] = useState<{ [key: number]: number }>({});
+  const [editingArticle, setEditingArticle] = useState<{ id: number; price: number } | null>(null);
+  const [priceChanges, setPriceChanges] = useState<{ [key: number]: number }>({});
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -89,6 +91,77 @@ export default function Page() {
     }));
   };
 
+  const handleEditPrice = (article: Tables<"article">) => {
+    setEditingArticle({
+      id: article.id,
+      price: article.price
+    });
+  };
+
+  const handleUpdatePrice = async () => {
+    if (!editingArticle) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('article')
+        .update({ price: editingArticle.price })
+        .eq('id', editingArticle.id);
+
+      if (error) throw error;
+
+      setArticles(articles.map(article => 
+        article.id === editingArticle.id ? { ...article, price: editingArticle.price } : article
+      ));
+      setFilteredArticles(filteredArticles.map(article => 
+        article.id === editingArticle.id ? { ...article, price: editingArticle.price } : article
+      ));
+      setEditingArticle(null);
+    } catch (err) {
+      console.error('Error updating price:', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingArticle(null);
+  };
+
+  const handlePriceChange = (articleId: number, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setPriceChanges(prev => ({
+      ...prev,
+      [articleId]: numValue
+    }));
+  };
+
+  const updatePrice = async (articleId: number) => {
+    const newPrice = priceChanges[articleId];
+    if (newPrice === undefined || newPrice < 0) return;
+
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from('article')
+        .update({ price: newPrice })
+        .eq('id', articleId);
+
+      if (error) throw error;
+
+      setArticles(articles.map(article => 
+        article.id === articleId ? { ...article, price: newPrice } : article
+      ));
+      setFilteredArticles(filteredArticles.map(article => 
+        article.id === articleId ? { ...article, price: newPrice } : article
+      ));
+      setPriceChanges(prev => ({
+        ...prev,
+        [articleId]: 0
+      }));
+    } catch (err) {
+      console.error('Error updating price:', err);
+    }
+  };
+
   if (isLoading) {
     return <div>Chargement...</div>;
   }
@@ -100,45 +173,91 @@ export default function Page() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
             <h1 className="text-2xl font-bold">Articles</h1>
-            <div className="w-full md:w-80">
-              <SearchBar articles={articles} onSearchResults={handleSearchResults} />
+            <div className="flex items-center gap-4">
+              <div className="w-full md:w-80">
+                <SearchBar articles={articles} onSearchResults={handleSearchResults} />
+              </div>
+              <Link
+                href="/create_article"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+              >
+                <span className="text-xl">+</span>
+                <span>Créer un article</span>
+              </Link>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredArticles.map((article) => (
-              <div key={article.id} className="bg-white p-4 rounded-lg shadow">
-                <h3 className="font-bold">{article.name}</h3>
-                <p className="text-indigo-600">{article.price}€</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <button
-                    onClick={() => updateQuantity(article.id, -(quantityChanges[article.id] || 0))}
-                    className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    min="0"
-                    value={quantityChanges[article.id] || 0}
-                    onChange={(e) => handleQuantityChange(article.id, e.target.value)}
-                    className="w-16 px-2 py-1 border rounded text-center"
-                  />
-                  <button
-                    onClick={() => updateQuantity(article.id, quantityChanges[article.id] || 0)}
-                    className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded"
-                  >
-                    +
-                  </button>
-                  <span className="ml-2">Stock: {article.quantity}</span>
-                  <button
-                    onClick={() => resetQuantity(article.id)}
-                    className="ml-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                  >
-                    Reset
-                  </button>
+              <div key={article.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-800">{article.name}</h3>
+                  </div>
+
+                  {article.description && (
+                    <p className="text-sm text-gray-600">{article.description}</p>
+                  )}
+
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Prix actuel</span>
+                      <span className="text-lg font-semibold text-indigo-600">{article.price}€</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={priceChanges[article.id] || ''}
+                        onChange={(e) => handlePriceChange(article.id, e.target.value)}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Nouveau prix"
+                      />
+                      <button
+                        onClick={() => updatePrice(article.id)}
+                        className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg transition-colors text-sm font-medium"
+                      >
+                        Mettre à jour
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Stock actuel</span>
+                      <span className="text-lg font-semibold text-gray-900">{article.quantity}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => updateQuantity(article.id, -(quantityChanges[article.id] || 0))}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        Retirer
+                      </button>
+                      <input
+                        type="number"
+                        min="0"
+                        value={quantityChanges[article.id] || 0}
+                        onChange={(e) => handleQuantityChange(article.id, e.target.value)}
+                        className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        placeholder="Qté"
+                      />
+                      <button
+                        onClick={() => updateQuantity(article.id, quantityChanges[article.id] || 0)}
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        Ajouter
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => resetQuantity(article.id)}
+                      className="w-full mt-2 bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg transition-colors text-sm font-medium"
+                    >
+                      Réinitialiser le stock
+                    </button>
+                  </div>
                 </div>
-                {article.description && <p className="text-sm text-gray-600 mt-2">{article.description}</p>}
               </div>
             ))}
           </div>
@@ -146,15 +265,6 @@ export default function Page() {
           {filteredArticles.length === 0 && (
             <p className="text-center py-4">Aucun article trouvé</p>
           )}
-
-          <div className="text-center mt-6">
-            <Link
-              href="/create_article"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              Créer un article
-            </Link>
-          </div>
         </div>
       </div>
     </div>
