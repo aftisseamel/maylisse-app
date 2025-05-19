@@ -149,7 +149,18 @@ export default function CreateOrder() {
                         label="Livreur"
                         options={deliveryMen.map(dm => ({
                             value: dm.pseudo_delivery_man,
-                            label: `${dm.pseudo_delivery_man} (${dm.status === 'available' ? 'Disponible' : 'Indisponible'})`
+                            label: (
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="font-medium">{dm.pseudo_delivery_man}</span>
+                                    <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
+                                        dm.status === 'available' 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {dm.status === 'available' ? 'Disponible' : 'Indisponible'}
+                                    </span>
+                                </div>
+                            )
                         }))}
                         required
                         searchable

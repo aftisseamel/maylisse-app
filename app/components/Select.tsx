@@ -6,20 +6,22 @@ import { IoSearch } from 'react-icons/io5';
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string | React.ReactNode }[];
   searchable?: boolean;
 }
 
 export default function Select({ label, error, options, searchable = false, className = '', value, onChange, ...props }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOption, setSelectedOption] = useState<{ value: string; label: string } | null>(
+  const [selectedOption, setSelectedOption] = useState<{ value: string; label: string | React.ReactNode } | null>(
     value ? options.find(opt => opt.value === value) || null : null
   );
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    typeof option.label === 'string' 
+      ? option.label.toLowerCase().includes(searchTerm.toLowerCase())
+      : true
   );
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export default function Select({ label, error, options, searchable = false, clas
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (option: { value: string; label: string }) => {
+  const handleSelect = (option: { value: string; label: string | React.ReactNode }) => {
     setSelectedOption(option);
     setIsOpen(false);
     setSearchTerm('');
