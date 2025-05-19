@@ -30,6 +30,12 @@ export default function NavigationBar() {
                         >
                             Clients
                         </Link>
+                        <Link
+                            href="/delivery_man"
+                            className="inline-flex items-center px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md"
+                        >
+                            Livreurs
+                        </Link>
                     </div>
                 </div>
             </div>
