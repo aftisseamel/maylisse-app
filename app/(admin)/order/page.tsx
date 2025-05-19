@@ -7,12 +7,13 @@ import { useRouter } from 'next/navigation';
 import SearchBarOrders from "../../components/SearchBarOrders";
 import { data_orders } from '@/app/data_orders';
 import NavigationBar from '@/app/components/NavigationBar';
-
+import { createClient } from '@/utils/supabase/client';
 export default function Page() {
     const router = useRouter();
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
 
     // Charger les commandes au démarrage
     useEffect(() => {
@@ -39,28 +40,51 @@ export default function Page() {
         return <div>Chargement...</div>;
     }
 
+    const handleOrderInitiatedClick = async (orderId: number) => 
+    {
+        const status = 'preparation';
+        const supabase = createClient();
+
+        const {error} = await supabase.from('order').update({status: status}).eq('id',orderId);
+        if (error) {
+            console.error('Error updating order status:', error);
+        }
+        router.push(`/orderID/${orderId}`);
+    }
+
+    const handleOrderPreparationClick = async (orderId: number) => 
+    {
+        router.push(`/orderID/${orderId}`);
+    }
+
     return (
         <div>
             <NavigationBar />
-            {/* Main Content */}
             <div className="p-4">
                 <div className="max-w-6xl mx-auto">
-                    {/* En-tête avec titre et recherche */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                         <h1 className="text-2xl font-bold">Commandes</h1>
-                        <div className="w-full md:w-80">
-                            <SearchBarOrders orders={orders} onSearchResults={handleSearchResults} />
+                        <div className="flex items-center gap-4">
+                            <div className="w-full md:w-80">
+                                <SearchBarOrders orders={orders} onSearchResults={handleSearchResults} />
+                            </div>
+                            <Link
+                                href="/create_order"
+                                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                Créer une commande
+                            </Link>
                         </div>
                     </div>
 
-                    {/* Liste des commandes */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredOrders.map((order) => (
                             <div key={order.id} className="bg-white p-4 rounded-lg shadow">
                                 <div className="flex justify-between items-start">
                                     <h3 className="font-bold">Commande #{order.id}</h3>
                                     <span className={`px-2 py-1 text-xs font-semibold rounded-full 
-                                        ${order.status === 'initiated' ? 'bg-yellow-100 text-yellow-800' :
+                                        ${
+                                        order.status === 'initiated' ? 'bg-yellow-100 text-yellow-800' :
                                         order.status === 'preparation' ? 'bg-blue-100 text-blue-800' :
                                         order.status === 'prepared' ? 'bg-purple-100 text-purple-800' :
                                         order.status === 'delivering' ? 'bg-orange-100 text-orange-800' :
@@ -84,31 +108,32 @@ export default function Page() {
                                 {order.status === 'initiated' && (
                                     <div className="mt-4">
                                         <button 
-                                            onClick={() => router.push(`/orderID/${order.id}`)}
+                                            onClick={() =>  handleOrderInitiatedClick(order.id)}
                                             className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
                                         >
                                             Ajouter des articles
                                         </button>
                                     </div>
                                 )}
+
+                                {order.status === 'preparation' && (
+                                    <div className="mt-4">
+                                        <button 
+                                            onClick={() =>  handleOrderPreparationClick(order.id)}
+                                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                                        >
+                                            Continuer la préparation
+                                        </button>
+                                    </div>
+                                )
+                                }
                             </div>
                         ))}
                     </div>
 
-                    {/* Message si aucune commande */}
                     {filteredOrders.length === 0 && (
                         <p className="text-center py-4">Aucune commande trouvée</p>
                     )}
-
-                    {/* Bouton de création */}
-                    <div className="text-center mt-6">
-                        <Link
-                            href="/create_order"
-                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                            Créer une commande
-                        </Link>
-                    </div>
                 </div>
             </div>
         </div>
