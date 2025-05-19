@@ -84,7 +84,8 @@ export default function Page() {
   };
 
   const handleQuantityChange = (articleId: number, value: string) => {
-    const numValue = parseInt(value) || 0;
+    const cleanValue = value.replace(/^0+/, '');
+    const numValue = parseInt(cleanValue) || 0;
     setQuantityChanges(prev => ({
       ...prev,
       [articleId]: numValue
@@ -92,7 +93,8 @@ export default function Page() {
   };
 
   const handlePriceChange = (articleId: number, value: string) => {
-    const numValue = parseFloat(value) || 0;
+    const cleanValue = value.replace(/^0+(\d)/, '$1');
+    const numValue = parseFloat(cleanValue) || 0;
     setPriceChanges(prev => ({
       ...prev,
       [articleId]: numValue
@@ -172,7 +174,13 @@ export default function Page() {
                         min="0"
                         step="0.01"
                         value={priceChanges[article.id] || ''}
-                        onChange={(e) => handlePriceChange(article.id, e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value.startsWith('0') && value.length > 1) {
+                            e.target.value = value.slice(1);
+                          }
+                          handlePriceChange(article.id, e.target.value);
+                        }}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Nouveau prix"
                       />
@@ -201,7 +209,13 @@ export default function Page() {
                         type="number"
                         min="0"
                         value={quantityChanges[article.id] || 0}
-                        onChange={(e) => handleQuantityChange(article.id, e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value.startsWith('0') && value.length > 1) {
+                            e.target.value = value.slice(1);
+                          }
+                          handleQuantityChange(article.id, e.target.value);
+                        }}
                         className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         placeholder="Qté"
                       />
