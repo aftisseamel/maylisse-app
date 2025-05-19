@@ -364,8 +364,8 @@ export default function Page() {
                                             <div className="mt-6">
                                                 <button
                                                     onClick={() => handleOrderInitiatedClick(order.id)}
-                                                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-sm hover:shadow-md"
-                                                >
+                                                    className="w-full gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-all duration-200"
+                                                    >
                                                     Ajouter des articles
                                                 </button>
                                             </div>
@@ -384,7 +384,7 @@ export default function Page() {
                                             <div className="mt-6">
                                                 <button
                                                     onClick={() => handleOrderPreparedClick(order.id)}
-                                                    className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-sm hover:shadow-md"
+                                                    className="w-full gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-all duration-200"
                                                 >
                                                     Détails de la commande
                                                 </button>
