@@ -91,41 +91,6 @@ export default function Page() {
     }));
   };
 
-  const handleEditPrice = (article: Tables<"article">) => {
-    setEditingArticle({
-      id: article.id,
-      price: article.price
-    });
-  };
-
-  const handleUpdatePrice = async () => {
-    if (!editingArticle) return;
-
-    try {
-      const supabase = createClient();
-      const { error } = await supabase
-        .from('article')
-        .update({ price: editingArticle.price })
-        .eq('id', editingArticle.id);
-
-      if (error) throw error;
-
-      setArticles(articles.map(article => 
-        article.id === editingArticle.id ? { ...article, price: editingArticle.price } : article
-      ));
-      setFilteredArticles(filteredArticles.map(article => 
-        article.id === editingArticle.id ? { ...article, price: editingArticle.price } : article
-      ));
-      setEditingArticle(null);
-    } catch (err) {
-      console.error('Error updating price:', err);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingArticle(null);
-  };
-
   const handlePriceChange = (articleId: number, value: string) => {
     const numValue = parseFloat(value) || 0;
     setPriceChanges(prev => ({
@@ -189,12 +154,9 @@ export default function Page() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredArticles.map((article) => (
-              <div key={article.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-semibold text-gray-800">{article.name}</h3>
-                  </div>
-
+              <div key={article.id} className="bg-white p-4 rounded-lg shadow">
+                <h3 className="font-bold pb-2 border-b border-gray-200">{article.name}</h3>
+                <div className="space-y-2 mt-2">
                   {article.description && (
                     <p className="text-sm text-gray-600">{article.description}</p>
                   )}
@@ -202,7 +164,7 @@ export default function Page() {
                   <div className="pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">Prix actuel</span>
-                      <span className="text-lg font-semibold text-indigo-600">{article.price}€</span>
+                      <span className="text-lg font-semibold text-gray-900">{article.price}€</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <input

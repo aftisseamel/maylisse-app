@@ -1,8 +1,8 @@
 "use client";
 
 import { Tables } from "@/database.types";
-import React, { ChangeEvent, useState, useEffect } from "react";
-import { AiOutlineSearch } from "react-icons/ai";
+import { useState, useCallback } from "react";
+import { IoSearch } from "react-icons/io5";
 
 interface SearchBarClientsProps {
   clients: Tables<"client">[];
@@ -12,39 +12,39 @@ interface SearchBarClientsProps {
 const SearchBarClients = ({ clients, onSearchResults }: SearchBarClientsProps) => {
   const [query, setQuery] = useState('');
 
-  useEffect(() => {
-    if (query.trim() === '') {
+  const handleSearch = useCallback((searchQuery: string) => {
+    if (searchQuery.trim() === '') {
       onSearchResults(clients);
       return;
     }
 
     const filtered = clients.filter(client =>
-      client.name.toLowerCase().includes(query.toLowerCase()) ||
-      (client.email?.toLowerCase() || '').includes(query.toLowerCase()) ||
-      (client.phone?.toLowerCase() || '').includes(query.toLowerCase()) ||
-      (client.address_client?.toLowerCase() || '').includes(query.toLowerCase())
+      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (client.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (client.phone?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+      (client.address_client?.toLowerCase() || '').includes(searchQuery.toLowerCase())
     );
 
     onSearchResults(filtered);
-  }, [query, clients, onSearchResults]);
+  }, [clients, onSearchResults]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    handleSearch(newQuery);
+  };
 
   return (
-    <div className="w-full max-w-xl mx-auto relative">
-      {/* Barre de recherche */}
+    <div className="w-full">
       <div className="relative">
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleChange}
           placeholder="Rechercher un client..."
-          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        <button
-          type="button"
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-600 text-white rounded-full p-2 hover:bg-indigo-700 transition-all"
-        >
-          <AiOutlineSearch size={20} />
-        </button>
+        <IoSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
     </div>
   );

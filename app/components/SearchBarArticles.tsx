@@ -3,6 +3,7 @@
 import { Tables } from "@/database.types";
 import React, { ChangeEvent } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
+import { IoSearch } from "react-icons/io5";
 
 const SearchBar = ({ 
   articles, 
@@ -11,6 +12,7 @@ const SearchBar = ({
   articles: Tables<"article">[];
   onSearchResults: (results: Tables<"article">[]) => void;
 }) => {
+
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.trim().toLowerCase();
     if (query === "") {
@@ -29,15 +31,10 @@ const SearchBar = ({
         <input
           type="search"
           placeholder="Rechercher un article..."
-          className="w-full px-4 py-2 rounded-lg border border-gray-300"
+          className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           onChange={handleSearch}
         />
-        <button
-          type="button"
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-1 rounded"
-        >
-          <AiOutlineSearch size={20} />
-        </button>
+        <IoSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
     </div>
   );
