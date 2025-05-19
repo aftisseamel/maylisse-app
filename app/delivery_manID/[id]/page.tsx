@@ -14,6 +14,27 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
     const [comments, setComments] = useState<{ [key: number]: string }>({});
     const [statusFilter, setStatusFilter] = useState<string>('all');
 
+    const toggleDeliveryManStatus = async () => {
+        if (!deliveryMan) return;
+        
+        try {
+            const supabase = createClient();
+            const newStatus = deliveryMan.status === 'available' ? 'unavailable' : 'available';
+            
+            const { error } = await supabase
+                .from('delivery_man')
+                .update({ status: newStatus })
+                .eq('id', idDelieveryMan);
+
+            if (error) throw error;
+
+            setDeliveryMan(prev => prev ? { ...prev, status: newStatus } : null);
+        } catch (error) {
+            console.error('Error updating delivery man status:', error);
+            alert('Une erreur est survenue lors de la mise à jour du statut');
+        }
+    };
+
     const updateOrderStatus = async (orderId: number, currentStatus: string) => {
         try {
             const supabase = createClient();
@@ -121,17 +142,41 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                         Commandes à livrer par {deliveryMan.pseudo_delivery_man}
                     </h1>
                     <div className="flex items-center space-x-4 text-gray-600">
-                        <p>{deliveryMan.email}</p>
-                        {deliveryMan.phone && <p>• {deliveryMan.phone}</p>}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <p>Email : {deliveryMan.email}</p>
+                    <p>Tel : {deliveryMan.phone}</p>
                     </div>
-
+                        
+                        <button
+                            onClick={toggleDeliveryManStatus}
+                            className={`px-4 py-2 rounded-lg transition-colors ${
+                                deliveryMan.status === 'available'
+                                    ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                                    : 'bg-red-100 text-red-800 hover:bg-red-200'
+                            }`}
+                        >
+                            {deliveryMan.status === 'available' ? 'Disponible' : 'Indisponible'}
+                        </button>
+                    </div>
+                    <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-500 mb-2">Changer le statut :</p>
+                        <select
+                            value={deliveryMan.status}
+                            onChange={(e) => {
+                                const newStatus = e.target.value as 'available' | 'unavailable';
+                                if (deliveryMan) {
+                                    setDeliveryMan({ ...deliveryMan, status: newStatus });
+                                    toggleDeliveryManStatus();
+                                }
+                            }}
+                            className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                            <option value="available">Disponible</option>
+                            <option value="unavailable">Indisponible</option>
+                        </select>
+                    </div>
                 </div>
-                <div className="mb-4">
-                    <Link href = {`/ready_to_deliever/${idDelieveryMan}`} className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
-                        Prendre en compte une nouvelle commande
-                    </Link>
-
-                </div>
+                
                 <div className="mb-6">
                     <select
                         value={statusFilter}

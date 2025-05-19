@@ -149,7 +149,7 @@ export default function CreateOrder() {
                         label="Livreur"
                         options={deliveryMen.map(dm => ({
                             value: dm.pseudo_delivery_man,
-                            label: dm.pseudo_delivery_man
+                            label: `${dm.pseudo_delivery_man} (${dm.status === 'available' ? 'Disponible' : 'Indisponible'})`
                         }))}
                         required
                         searchable
