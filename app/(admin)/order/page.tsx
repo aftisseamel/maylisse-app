@@ -9,6 +9,8 @@ import { data_orders } from '@/app/datas/data_orders';
 import NavigationBar from '@/app/components/NavigationBar';
 import { createClient } from '@/utils/supabase/client';
 
+type OrderStatus = 'initiated' | 'preparation' | 'prepared' | 'delivering' | 'delivered' | 'finished' | 'canceled';
+
 export default function Page() {
     const router = useRouter();
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
@@ -131,15 +133,47 @@ export default function Page() {
         router.push(`/orderID/${orderId}`);
     }
 
-    const statusLabels: { [key: string]: string } = {
-        initiated: 'Initialisée',
-        preparation: 'En préparation',
-        prepared: 'Préparée',
-        delivering: 'En livraison',
-        delivered: 'Livrée',
-        finished: 'Terminée',
-        canceled: 'Annulée'
+    const handleStatusChange = async (orderId: number, newStatus: OrderStatus) => {
+        try {
+            const supabase = createClient();
+            const { error } = await supabase
+                .from('order')
+                .update({ status: newStatus })
+                .eq('id', orderId);
+
+            if (error) throw error;
+
+            // Mettre à jour les listes locales
+            const updatedOrders = orders.map(order =>
+                order.id === orderId ? { ...order, status: newStatus } : order
+            );
+            setOrders(updatedOrders);
+            setFilteredOrders(updatedOrders);
+
+            // Mettre à jour les compteurs de statut
+            const newCounts = { ...statusCounts };
+            const oldStatus = orders.find(o => o.id === orderId)?.status;
+            if (oldStatus) {
+                newCounts[oldStatus] = (newCounts[oldStatus] || 1) - 1;
+            }
+            newCounts[newStatus] = (newCounts[newStatus] || 0) + 1;
+            setStatusCounts(newCounts);
+
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            alert('Une erreur est survenue lors de la mise à jour du statut');
+        }
     };
+
+    const statusOptions: { value: OrderStatus; label: string }[] = [
+        { value: 'initiated', label: 'Initialisée' },
+        { value: 'preparation', label: 'En préparation' },
+        { value: 'prepared', label: 'Préparée' },
+        { value: 'delivering', label: 'En livraison' },
+        { value: 'delivered', label: 'Livrée' },
+        { value: 'finished', label: 'Terminée' },
+        { value: 'canceled', label: 'Annulée' }
+    ];
 
     const handleDeleteOrder = async (orderId: number) => {
         if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
@@ -231,9 +265,9 @@ export default function Page() {
                                 className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             >
                                 <option value="all">Tous les statuts ({orders.length})</option>
-                                {Object.entries(statusLabels).map(([key, label]) => (
-                                    <option key={key} value={key}>
-                                        {label} ({statusCounts[key] || 0})
+                                {statusOptions.map(option => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label} ({statusCounts[option.value] || 0})
                                     </option>
                                 ))}
                             </select>
@@ -253,17 +287,25 @@ export default function Page() {
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="font-bold text-lg text-gray-800">Commande #{order.id}</h3>
                                     <div className="flex items-center gap-2">
-                                        <span className={`px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200
-                                            ${order.status === 'initiated' ? 'bg-yellow-100 text-yellow-800' :
-                                            order.status === 'preparation' ? 'bg-blue-100 text-blue-800' :
-                                            order.status === 'prepared' ? 'bg-purple-100 text-purple-800' :
-                                            order.status === 'delivering' ? 'bg-orange-100 text-orange-800' :
-                                            order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                            order.status === 'finished' ? 'bg-gray-100 text-gray-800' :
-                                            order.status === 'canceled' ? 'bg-red-100 text-red-800' :
-                                            'bg-gray-100 text-gray-800'}`}>
-                                            {statusLabels[order.status] ?? order.status}
-                                        </span>
+                                        <select
+                                            value={order.status}
+                                            onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
+                                            className={`px-3 py-1 text-sm font-medium rounded-full ${
+                                                order.status === 'initiated' ? 'bg-yellow-100 text-yellow-800' :
+                                                order.status === 'preparation' ? 'bg-blue-100 text-blue-800' :
+                                                order.status === 'prepared' ? 'bg-purple-100 text-purple-800' :
+                                                order.status === 'delivering' ? 'bg-orange-100 text-orange-800' :
+                                                order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                                                order.status === 'finished' ? 'bg-gray-100 text-gray-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}
+                                        >
+                                            {statusOptions.map(option => (
+                                                <option key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </option>
+                                            ))}
+                                        </select>
                                         {order.status === 'initiated' && (
                                             <>
                                                 <button
