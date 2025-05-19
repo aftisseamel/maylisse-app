@@ -8,6 +8,7 @@ import SearchBarOrders from "../../components/SearchBarOrders";
 import { data_orders } from '@/app/datas/data_orders';
 import NavigationBar from '@/app/components/NavigationBar';
 import { createClient } from '@/utils/supabase/client';
+import { jsPDF } from 'jspdf';
 
 type OrderStatus = 'initiated' | 'preparation' | 'prepared' | 'delivering' | 'delivered' | 'finished' | 'canceled';
 
@@ -246,6 +247,65 @@ export default function Page() {
         }
     };
 
+    const generateInvoice = (order: Tables<"order">) => {
+        const doc = new jsPDF();
+        const articles = orderArticles[order.id] || [];
+        
+        // En-tête
+        doc.setFontSize(20);
+        doc.text('Facture', 105, 20, { align: 'center' });
+        
+        // Informations de la commande
+        doc.setFontSize(12);
+        doc.text(`Commande #${order.id}`, 20, 40);
+        doc.text(`Date: ${new Date(order.created_at || '').toLocaleDateString()}`, 20, 50);
+        
+        // Informations client
+        doc.text('Client:', 20, 70);
+        doc.text(order.name_client, 20, 80);
+        doc.text('Adresse de livraison:', 20, 90);
+        doc.text(order.delivery_address, 20, 100);
+        
+        // Tableau des articles
+        doc.setFontSize(12);
+        doc.text('Articles', 20, 120);
+        
+        // En-tête du tableau
+        doc.setFontSize(10);
+        doc.text('Article', 20, 130);
+        doc.text('Quantité', 100, 130);
+        doc.text('Prix unitaire', 130, 130);
+        doc.text('Total', 170, 130);
+        
+        // Lignes des articles
+        let y = 140;
+        let total = 0;
+        
+        articles.forEach((item) => {
+            if (item.article) {
+                const articleTotal = item.quantity * item.price;
+                total += articleTotal;
+                
+                doc.text(item.article.name, 20, y);
+                doc.text(item.quantity.toString(), 100, y);
+                doc.text(`${item.price}€`, 130, y);
+                doc.text(`${articleTotal}€`, 170, y);
+                y += 10;
+            }
+        });
+        
+        // Total
+        doc.setFontSize(12);
+        doc.text(`Total: ${total}€`, 170, y + 10, { align: 'right' });
+        
+        // Statut de la commande
+        doc.text(`Statut: ${order.status}`, 20, y + 30);
+        
+        // Sauvegarder le PDF avec le nom du client et le numéro de commande
+        const fileName = `${order.name_client}_${order.id}.pdf`;
+        doc.save(fileName);
+    };
+
     if (isLoading) return <div>Chargement...</div>;
 
     return (
@@ -287,6 +347,15 @@ export default function Page() {
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="font-bold text-lg text-gray-800">Commande #{order.id}</h3>
                                     <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => generateInvoice(order)}
+                                            className="text-gray-500 hover:text-blue-600 transition-colors"
+                                            title="Télécharger la facture"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
                                         <select
                                             value={order.status}
                                             onChange={(e) => handleStatusChange(order.id, e.target.value as OrderStatus)}
