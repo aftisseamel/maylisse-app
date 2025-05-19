@@ -10,7 +10,7 @@ import NavigationBar from '@/app/components/NavigationBar';
 
 export default function OrderID( { params }: { params: Promise<{ id: string }> }) {
 
-    const searchParams = use(params);
+    const orderId = parseInt(use(params).id);
     const [order, setOrder] = useState<Tables<"order"> | null>(null);
     const [articles, setArticles] = useState<Tables<"article">[]>([]);
     const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
@@ -18,8 +18,10 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     const [orderArticles, setOrderArticles] = useState<(Tables<"order_article"> & { article: Tables<"article"> | null })[]>([]);
     const [editingArticle, setEditingArticle] = useState<{ id_order: number; id_article: number; price: number; quantity: number } | null>(null);
 
+    const [statusOrder, setStatusOrder] = useState('');
+
     const [formData, setFormData] = useState({
-        id_order: parseInt(searchParams.id),
+        id_order: orderId,
         id_article: 0,
         price: 0,
         quantity: 0,
@@ -33,11 +35,12 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             const { data : dataOrder, error : errorOrder } = await supabase
                 .from('order')
                 .select('*')
-                .eq('id', parseInt(searchParams.id));
+                .eq('id', orderId);
             if (errorOrder) {
                 console.error('Error fetching order:', errorOrder);
             } else {
                 setOrder(dataOrder[0]);
+                setStatusOrder(dataOrder[0].status);
             }
 
             const { data : dataArticles, error : errorArticles } = await supabase
@@ -54,7 +57,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             const { data: orderArticlesData, error: orderArticlesError } = await supabase
                 .from('order_article')
                 .select('*, article(*)')
-                .eq('id_order', parseInt(searchParams.id));
+                .eq('id_order', orderId);
 
             if (orderArticlesError) {
                 console.error('Error fetching order articles:', orderArticlesError);
@@ -65,13 +68,15 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             setIsLoading(false);
         }
         fetchOrder();
-    }, [searchParams.id]);
+    }, [orderId]);
 
     const handleSearchResults = (results: Tables<"article">[]) => {
         setFilteredArticles(results);
     }
 
     const handleSelectArticle = (article: Tables<"article">) => {
+
+
         if (articleToSelect?.id === article.id) {
             setArticleToSelect(null);
             setFormData({
@@ -110,7 +115,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             const { data: orderArticlesData, error: orderArticlesError } = await supabase
                 .from('order_article')
                 .select('*, article(*)')
-                .eq('id_order', parseInt(searchParams.id));
+                .eq('id_order', orderId);
 
             if (!orderArticlesError) {
                 setOrderArticles(orderArticlesData);
@@ -143,7 +148,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         const { data: orderArticlesData, error: orderArticlesError2 } = await supabase
                 .from('order_article')
                 .select('*, article(*)')
-                .eq('id_order', parseInt(searchParams.id));
+                .eq('id_order', orderId);
 
             if (!orderArticlesError2) {
                 setOrderArticles(orderArticlesData);
@@ -181,7 +186,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         const { data: orderArticlesData, error: orderArticlesError } = await supabase
             .from('order_article')
             .select('*, article(*)')
-            .eq('id_order', parseInt(searchParams.id));
+            .eq('id_order', orderId);
 
         if (!orderArticlesError) {
             setOrderArticles(orderArticlesData);
@@ -194,6 +199,18 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         setEditingArticle(null);
     };
 
+    const handleSubmitPreparationOrder = async (orderId: number) => {
+        console.log("voici la commande a confirmer : ", orderId);
+        const supabase = createClient();
+        const { error } = await supabase.from('order').update({status: 'prepared'}).eq('id', orderId);
+        if (error) {
+            console.error('Error updating order status:', error);
+        }
+        setStatusOrder('prepared');
+
+    }
+
+  
     return (
         <div>
             <NavigationBar />
@@ -210,7 +227,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Statut</p>
-                                <p className="font-medium">{order?.status}</p>
+                                <p className="font-medium">{statusOrder}</p>
                             </div>
                             <div className="col-span-2">
                                 <p className="text-sm text-gray-600">Description</p>
@@ -297,10 +314,21 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                                         Supprimer
                                                     </button>
                                                 </div>
+                                                
                                             </>
+                                            
                                         )}
+                                        
                                     </div>
                                 ))}
+                                <div> 
+                                <button 
+                                onClick={() => handleSubmitPreparationOrder(orderId)}>
+                                    confirmer les articles de la commande 
+                                </button>
+
+
+                                </div>
                             </div>
                         )}
                     </div>

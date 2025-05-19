@@ -56,6 +56,10 @@ export default function Page() {
     {
         router.push(`/orderID/${orderId}`);
     }
+    const handleOrderPreparedClick = async (orderId: number) => 
+    {
+        router.push(`/orderID/${orderId}`);
+    }
 
     return (
         <div>
@@ -127,6 +131,18 @@ export default function Page() {
                                     </div>
                                 )
                                 }
+                                {order.status === 'prepared' && (
+                                    <div className="mt-4">
+                                        <button 
+                                            onClick={() =>  handleOrderPreparedClick(order.id)}
+                                            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+
+                                        >   
+                                            details de la commande
+                                        </button>
+                                    </div>
+                                )}
+                                
                             </div>
                         ))}
                     </div>
