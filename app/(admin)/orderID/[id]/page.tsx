@@ -19,6 +19,8 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     const [editingArticle, setEditingArticle] = useState<{ id_order: number; id_article: number; price: number; quantity: number } | null>(null);
 
     const [statusOrder, setStatusOrder] = useState('');
+    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [totalPrice, setTotalPrice] = useState(0);
 
     const [formData, setFormData] = useState({
         id_order: orderId,
@@ -41,6 +43,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             } else {
                 setOrder(dataOrder[0]);
                 setStatusOrder(dataOrder[0].status);
+                setIsConfirmed(dataOrder[0].status === 'prepared');
             }
 
             const { data : dataArticles, error : errorArticles } = await supabase
@@ -63,6 +66,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                 console.error('Error fetching order articles:', orderArticlesError);
             } else {
                 setOrderArticles(orderArticlesData);
+                // Calculer le prix total
+                const total = orderArticlesData.reduce((sum, item) => {
+                    return sum + (item.price * item.quantity * 2000);
+                }, 0);
+                setTotalPrice(total);
             }
 
             setIsLoading(false);
@@ -119,6 +127,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
 
             if (!orderArticlesError) {
                 setOrderArticles(orderArticlesData);
+                // Mettre à jour le prix total
+                const total = orderArticlesData.reduce((sum, item) => {
+                    return sum + (item.price * item.quantity * 2000);
+                }, 0);
+                setTotalPrice(total);
             }
             
             // Réinitialiser le formulaire
@@ -152,6 +165,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
 
             if (!orderArticlesError2) {
                 setOrderArticles(orderArticlesData);
+                // Mettre à jour le prix total
+                const total = orderArticlesData.reduce((sum, item) => {
+                    return sum + (item.price * item.quantity * 2000);
+                }, 0);
+                setTotalPrice(total);
             }   
     }
 
@@ -190,6 +208,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
 
         if (!orderArticlesError) {
             setOrderArticles(orderArticlesData);
+            // Mettre à jour le prix total
+            const total = orderArticlesData.reduce((sum, item) => {
+                return sum + (item.price * item.quantity * 2000);
+            }, 0);
+            setTotalPrice(total);
         }
 
         setEditingArticle(null);
@@ -205,12 +228,16 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         const { error } = await supabase.from('order').update({status: 'prepared'}).eq('id', orderId);
         if (error) {
             console.error('Error updating order status:', error);
+        } else {
+            setStatusOrder('prepared');
+            setIsConfirmed(true);
         }
-        setStatusOrder('prepared');
-
     }
 
-  
+    const canModifyArticles = () => {
+        return !isConfirmed || statusOrder === 'preparation';
+    }
+
     return (
         <div>
             <NavigationBar />
@@ -220,7 +247,7 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">Détails de la commande #{order?.id}</h1>
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-3 gap-4">
                             <div>
                                 <p className="text-sm text-gray-600">Client</p>
                                 <p className="font-medium">{order?.name_client}</p>
@@ -229,7 +256,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                 <p className="text-sm text-gray-600">Statut</p>
                                 <p className="font-medium">{statusOrder}</p>
                             </div>
-                            <div className="col-span-2">
+                            <div>
+                                <p className="text-sm text-gray-600">Prix total</p>
+                                <p className="font-medium text-lg text-green-600">{totalPrice.toFixed(2)}€</p>
+                            </div>
+                            <div className="col-span-3">
                                 <p className="text-sm text-gray-600">Description</p>
                                 <p className="font-medium">{order?.description_order}</p>
                             </div>
@@ -300,94 +331,99 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                                     <p className="text-sm text-gray-600">Prix unitaire: {orderArticle.price}€</p>
                                                     <p className="text-sm text-gray-600">Prix total: {orderArticle.price * orderArticle.quantity * 2000}€</p>
                                                 </div>
-                                                <div className="mt-4 flex gap-2">
-                                                    <button 
-                                                        onClick={() => handleEditArticle(orderArticle)}
-                                                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                                                    >
-                                                        Modifier
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
-                                                        className="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
-                                                    >
-                                                        Supprimer
-                                                    </button>
-                                                </div>
-                                                
+                                                {canModifyArticles() && (
+                                                    <div className="mt-4 flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleEditArticle(orderArticle)}
+                                                            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                                                        >
+                                                            Modifier
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
+                                                            className="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+                                                        >
+                                                            Supprimer
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </>
-                                            
                                         )}
-                                        
                                     </div>
                                 ))}
-                                <div> 
-                                <button 
-                                onClick={() => handleSubmitPreparationOrder(orderId)}>
-                                    confirmer les articles de la commande 
-                                </button>
-
-
-                                </div>
+                                {!isConfirmed && (
+                                    <div className="col-span-full mt-4"> 
+                                        <button 
+                                            onClick={() => handleSubmitPreparationOrder(orderId)}
+                                            className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors shadow-md"
+                                        >
+                                            Confirmer les articles de la commande
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="mb-8">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">Rechercher un article</h2>
-                    <SearchBar articles={articles} onSearchResults={handleSearchResults} />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredArticles.map((article) => (
-                        <div key={article.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">{article.name}</h3>
-                            <div className="space-y-2 mb-4">
-                                <p className="text-gray-600">Prix: {article.price}€</p>
-                                <p className="text-gray-600">Stock: {article.quantity}</p>
-                            </div>
-                            {articleToSelect?.id === article.id ? (
-                                <div className="mt-4 space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <Input 
-                                            type="number" 
-                                            name="price" 
-                                            placeholder={`Prix : ${article.price}`}
-                                            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})} 
-                                        />
-                                        <Input 
-                                            type="number" 
-                                            name="quantity" 
-                                            placeholder="Nombre de lots" 
-                                            onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0})}
-                                        />
-                                    </div>
-                                    <div className="text-sm space-y-1">
-                                        <p className="text-gray-600">Quantité totale: {formData.quantity * 2000}</p>
-                                        <p className="text-gray-600">Prix total: {formData.price * formData.quantity * 2000}€</p>
-                                        <p className="text-gray-600">Quantité restante: {article.quantity - formData.quantity * 2000}</p>
-                                    </div>
-                                    <button 
-                                        type='submit' 
-                                        onClick={() => handleSubmitAddArticle()}
-                                        className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                                    >
-                                        Confirmer l'ajout
-                                    </button>
-                                </div>
-                            ) : (
-                                <button 
-                                    type='submit' 
-                                    onClick={() => handleSelectArticle(article)}
-                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                                >
-                                    Ajouter cet article
-                                </button>
-                            )}
+                {canModifyArticles() && (
+                    <>
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Rechercher un article</h2>
+                            <SearchBar articles={articles} onSearchResults={handleSearchResults} />
                         </div>
-                    ))}
-                </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredArticles.map((article) => (
+                                <div key={article.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{article.name}</h3>
+                                    <div className="space-y-2 mb-4">
+                                        <p className="text-gray-600">Prix: {article.price}€</p>
+                                        <p className="text-gray-600">Stock: {article.quantity}</p>
+                                    </div>
+                                    {articleToSelect?.id === article.id ? (
+                                        <div className="mt-4 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <Input 
+                                                    type="number" 
+                                                    name="price" 
+                                                    placeholder={`Prix : ${article.price}`}
+                                                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})} 
+                                                />
+                                                <Input 
+                                                    type="number" 
+                                                    name="quantity" 
+                                                    placeholder="Nombre de lots" 
+                                                    onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0})}
+                                                />
+                                            </div>
+                                            <div className="text-sm space-y-1">
+                                                <p className="text-gray-600">Quantité totale: {formData.quantity * 2000}</p>
+                                                <p className="text-gray-600">Prix total: {formData.price * formData.quantity * 2000}€</p>
+                                                <p className="text-gray-600">Quantité restante: {article.quantity - formData.quantity * 2000}</p>
+                                            </div>
+                                            <button 
+                                                type='submit' 
+                                                onClick={() => handleSubmitAddArticle()}
+                                                className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                                            >
+                                                Confirmer l'ajout
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            type='submit' 
+                                            onClick={() => handleSelectArticle(article)}
+                                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                                        >
+                                            Ajouter cet article
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

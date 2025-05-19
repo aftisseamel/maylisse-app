@@ -18,6 +18,7 @@ export default function Page() {
     const [deliveryMen, setDeliveryMen] = useState<{ pseudo_delivery_man: string }[]>([]);
     const [clients, setClients] = useState<{ name: string }[]>([]);
     const [orderArticles, setOrderArticles] = useState<{ [key: number]: (Tables<"order_article"> & { article: Tables<"article"> | null })[] }>({});
+    const [statusCounts, setStatusCounts] = useState<{ [key: string]: number }>({});
 
     const [editOrderId, setEditOrderId] = useState<number | null>(null);
     const [editedOrderData, setEditedOrderData] = useState<Partial<Tables<"order">>>({});
@@ -31,6 +32,13 @@ export default function Page() {
                 const data = await data_orders();
                 setOrders(data);
                 setFilteredOrders(data);
+
+                // Calculer le nombre de commandes par statut
+                const counts = data.reduce((acc, order) => {
+                    acc[order.status] = (acc[order.status] || 0) + 1;
+                    return acc;
+                }, {} as { [key: string]: number });
+                setStatusCounts(counts);
 
                 // Récupérer les livreurs
                 const { data: deliveryMenData, error: deliveryMenError } = await supabase
@@ -222,9 +230,11 @@ export default function Page() {
                                 onChange={handleStatusFilterChange}
                                 className="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                             >
-                                <option value="all">Tous les statuts</option>
+                                <option value="all">Tous les statuts ({orders.length})</option>
                                 {Object.entries(statusLabels).map(([key, label]) => (
-                                    <option key={key} value={key}>{label}</option>
+                                    <option key={key} value={key}>
+                                        {label} ({statusCounts[key] || 0})
+                                    </option>
                                 ))}
                             </select>
                             <Link

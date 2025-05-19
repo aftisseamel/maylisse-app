@@ -10,7 +10,8 @@ export default function AdminPage() {
     articles: 0,
     clients: 0,
     orders: 0,
-    livreurs: 0
+    livreurs: 0,
+    deliveringOrders: 0
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -19,18 +20,20 @@ export default function AdminPage() {
       try {
         const supabase = createClient();
         
-        const [articles, clients, orders, livreurs] = await Promise.all([
+        const [articles, clients, orders, livreurs, deliveringOrders] = await Promise.all([
           supabase.from('article').select('id', { count: 'exact' }),
           supabase.from('client').select('id', { count: 'exact' }),
           supabase.from('order').select('id', { count: 'exact' }),
-          supabase.from('delivery_man').select('id', { count: 'exact' })
+          supabase.from('delivery_man').select('id', { count: 'exact' }),
+          supabase.from('order').select('id', { count: 'exact' }).eq('status', 'delivering')
         ]);
 
         setStats({
           articles: articles.count || 0,
           clients: clients.count || 0,
           orders: orders.count || 0,
-          livreurs: livreurs.count || 0
+          livreurs: livreurs.count || 0,
+          deliveringOrders: deliveringOrders.count || 0
         });
       } catch (error) {
         console.error('Erreur lors du chargement des statistiques:', error);
@@ -58,8 +61,18 @@ export default function AdminPage() {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Tableau de bord</h1>
-            <p className="text-gray-600">Bienvenue dans votre espace d'administration</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-800 mb-2">Tableau de bord</h1>
+                <p className="text-gray-600">Bienvenue dans votre espace d'administration</p>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-4 text-right">
+                <p className="text-sm font-medium text-orange-600 mb-1">Commandes en livraison</p>
+                <span className="text-5xl font-bold text-orange-600">
+                  {stats.deliveringOrders}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -126,6 +139,8 @@ export default function AdminPage() {
                 <span>→</span>
               </Link>
             </div>
+
+           
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-6">
