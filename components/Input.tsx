@@ -8,9 +8,11 @@ interface InputProps {
     label?: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    min?: string;
+    step?: string;
 }
 
-export default function Input({ name, type = 'text', placeholder, required = false, label, value, onChange }: InputProps) {
+export default function Input({ name, type = 'text', placeholder, required = false, label, value, onChange, min, step }: InputProps) {
     return (
         <div className="w-full">
             {label && (
@@ -25,6 +27,8 @@ export default function Input({ name, type = 'text', placeholder, required = fal
                 required={required}
                 value={value}
                 onChange={onChange}
+                min={min}
+                step={step}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             />
         </div>
