@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
-import SearchBar from "../../components/SearchBarArticles";
-import data_articles from "../../datas/data_articles";
+import SearchBar from "../../../components/SearchBarArticles";
+import data_articles from "../../../datas/data_articles";
 import { createClient } from '@/utils/supabase/client';
-import NavigationBar from '@/app/components/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function Page() {
 

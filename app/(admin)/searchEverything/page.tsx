@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Tables } from '@/database.types';
-import SearchBar from "../../components/SearchBarArticles";
-import SearchBarClients from "../../components/SearchBarClients";
-import SearchBarOrders from "../../components/SearchBarOrders";
-import SearchBarDeliveryMan from "../../components/SearchBarDeliveryMan";
+import SearchBar from "../../../components/SearchBarArticles";
+import SearchBarClients from "../../../components/SearchBarClients";
+import SearchBarOrders from "../../../components/SearchBarOrders";
+import SearchBarDeliveryMan from "../../../components/SearchBarDeliveryMan";
 
 export default function SearchEverything() {
   const [articles, setArticles] = useState<Tables<"article">[]>([]);

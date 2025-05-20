@@ -6,9 +6,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from '@/utils/supabase/client';
 import { Tables } from '@/database.types';
-import Select from '@/app/components/Select';
-import Input from '@/app/components/Input';
-import NavigationBar from '@/app/components/NavigationBar';
+import Select from '@/components/Select';
+import Input from '@/components/Input';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function CreateOrder() {
     const router = useRouter();

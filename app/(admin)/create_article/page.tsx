@@ -3,8 +3,8 @@
 import { redirect } from 'next/navigation';
 import { createArticle } from './action';
 import { useTransition } from 'react';
-import Input from '@/app/components/Input';
-import NavigationBar from '@/app/components/NavigationBar';
+import Input from '@/components/Input';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function Create_article() {
   const [isPending, startTransition] = useTransition();
@@ -33,7 +33,6 @@ export default function Create_article() {
 
           <button
             type="submit"
-            disabled={isPending}
             className={`w-full py-3 px-4 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all ${
               isPending ? 'opacity-50 cursor-not-allowed' : ''
             }`}

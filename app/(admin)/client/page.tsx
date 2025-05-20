@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
-import SearchBarClients from "../../components/SearchBarClients";
-import data_clients from "../../datas/data_clients";
-import NavigationBar from '@/app/components/NavigationBar';
+import SearchBarClients from "../../../components/SearchBarClients";
+import data_clients from "../../../datas/data_clients";
+import NavigationBar from '@/components/NavigationBar';
 import { createClient } from '@/utils/supabase/client';
 
 export default function Page() {

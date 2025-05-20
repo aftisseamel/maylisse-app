@@ -2,10 +2,10 @@
 
 import { useTransition, useState } from 'react';
 import { createDeliveryMan } from './action';
-import Input from '@/app/components/Input';
+import Input from '@/components/Input';
 import { IoAlertCircle } from 'react-icons/io5';
 import { useRouter } from 'next/navigation';
-import NavigationBar from '@/app/components/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function CreateDeliveryMan() {
   const [isPending, startTransition] = useTransition();

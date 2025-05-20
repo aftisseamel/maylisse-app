@@ -2,10 +2,10 @@
 
 import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
-import data_orders from '@/app/datas/data_orders';
-import data_clients from '@/app/datas/data_clients';
+import data_orders from '@/datas/data_orders';
+import data_clients from '@/datas/data_clients';
 import { useRouter } from 'next/navigation';
-import NavigationBar from '@/app/components/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 import { createClient } from '@supabase/supabase-js';
 import { jsPDF } from 'jspdf';
 

@@ -3,14 +3,14 @@
 import { use, useEffect, useState } from 'react';
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/client';
-import SearchBar from '@/app/components/SearchBarArticles';
-import Input from '@/app/components/Input';
+import SearchBar from '@/components/SearchBarArticles';
+import Input from '@/components/Input';
 import { insertOrderArticle } from './action';
-import NavigationBar from '@/app/components/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function OrderID( { params }: { params: Promise<{ id: string }> }) {
 
-    const orderId = parseInt(use(params).id);
+    const searchParams = use(params);
     const [order, setOrder] = useState<Tables<"order"> | null>(null);
     const [articles, setArticles] = useState<Tables<"article">[]>([]);
     const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
@@ -18,12 +18,8 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
     const [orderArticles, setOrderArticles] = useState<(Tables<"order_article"> & { article: Tables<"article"> | null })[]>([]);
     const [editingArticle, setEditingArticle] = useState<{ id_order: number; id_article: number; price: number; quantity: number } | null>(null);
 
-    const [statusOrder, setStatusOrder] = useState('');
-    const [isConfirmed, setIsConfirmed] = useState(false);
-    const [totalPrice, setTotalPrice] = useState(0);
-
     const [formData, setFormData] = useState({
-        id_order: orderId,
+        id_order: parseInt(searchParams.id),
         id_article: 0,
         price: 0,
         quantity: 0,
@@ -37,13 +33,11 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             const { data : dataOrder, error : errorOrder } = await supabase
                 .from('order')
                 .select('*')
-                .eq('id', orderId);
+                .eq('id', parseInt(searchParams.id));
             if (errorOrder) {
                 console.error('Error fetching order:', errorOrder);
             } else {
                 setOrder(dataOrder[0]);
-                setStatusOrder(dataOrder[0].status);
-                setIsConfirmed(dataOrder[0].status === 'prepared');
             }
 
             const { data : dataArticles, error : errorArticles } = await supabase
@@ -60,31 +54,24 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             const { data: orderArticlesData, error: orderArticlesError } = await supabase
                 .from('order_article')
                 .select('*, article(*)')
-                .eq('id_order', orderId);
+                .eq('id_order', parseInt(searchParams.id));
 
             if (orderArticlesError) {
                 console.error('Error fetching order articles:', orderArticlesError);
             } else {
                 setOrderArticles(orderArticlesData);
-                // Calculer le prix total
-                const total = orderArticlesData.reduce((sum, item) => {
-                    return sum + (item.price * item.quantity * 2000);
-                }, 0);
-                setTotalPrice(total);
             }
 
             setIsLoading(false);
         }
         fetchOrder();
-    }, [orderId]);
+    }, [searchParams.id]);
 
     const handleSearchResults = (results: Tables<"article">[]) => {
         setFilteredArticles(results);
     }
 
     const handleSelectArticle = (article: Tables<"article">) => {
-
-
         if (articleToSelect?.id === article.id) {
             setArticleToSelect(null);
             setFormData({
@@ -118,20 +105,14 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         const response = await insertOrderArticle(formDataObj);
         
         if (response.success) {
-            // Mettre à jour la liste des articles de la commande
             const supabase = createClient();
             const { data: orderArticlesData, error: orderArticlesError } = await supabase
                 .from('order_article')
                 .select('*, article(*)')
-                .eq('id_order', orderId);
+                .eq('id_order', parseInt(searchParams.id));
 
             if (!orderArticlesError) {
                 setOrderArticles(orderArticlesData);
-                // Mettre à jour le prix total
-                const total = orderArticlesData.reduce((sum, item) => {
-                    return sum + (item.price * item.quantity * 2000);
-                }, 0);
-                setTotalPrice(total);
             }
             
             // Réinitialiser le formulaire
@@ -161,15 +142,10 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         const { data: orderArticlesData, error: orderArticlesError2 } = await supabase
                 .from('order_article')
                 .select('*, article(*)')
-                .eq('id_order', orderId);
+                .eq('id_order', parseInt(searchParams.id));
 
             if (!orderArticlesError2) {
                 setOrderArticles(orderArticlesData);
-                // Mettre à jour le prix total
-                const total = orderArticlesData.reduce((sum, item) => {
-                    return sum + (item.price * item.quantity * 2000);
-                }, 0);
-                setTotalPrice(total);
             }   
     }
 
@@ -200,19 +176,13 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             return;
         }
 
-        // Rafraîchir la liste des articles
         const { data: orderArticlesData, error: orderArticlesError } = await supabase
             .from('order_article')
             .select('*, article(*)')
-            .eq('id_order', orderId);
+            .eq('id_order', parseInt(searchParams.id));
 
         if (!orderArticlesError) {
             setOrderArticles(orderArticlesData);
-            // Mettre à jour le prix total
-            const total = orderArticlesData.reduce((sum, item) => {
-                return sum + (item.price * item.quantity * 2000);
-            }, 0);
-            setTotalPrice(total);
         }
 
         setEditingArticle(null);
@@ -222,45 +192,24 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         setEditingArticle(null);
     };
 
-    const handleSubmitPreparationOrder = async (orderId: number) => {
-        console.log("voici la commande a confirmer : ", orderId);
-        const supabase = createClient();
-        const { error } = await supabase.from('order').update({status: 'prepared'}).eq('id', orderId);
-        if (error) {
-            console.error('Error updating order status:', error);
-        } else {
-            setStatusOrder('prepared');
-            setIsConfirmed(true);
-        }
-    }
-
-    const canModifyArticles = () => {
-        return !isConfirmed || statusOrder === 'preparation';
-    }
-
     return (
         <div>
             <NavigationBar />
 
-            {/* Main Content */}
             <div className="p-6 max-w-7xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-800 mb-4">Détails de la commande #{order?.id}</h1>
                     <div className="bg-white rounded-lg shadow-md p-6">
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm text-gray-600">Client</p>
                                 <p className="font-medium">{order?.name_client}</p>
                             </div>
                             <div>
                                 <p className="text-sm text-gray-600">Statut</p>
-                                <p className="font-medium">{statusOrder}</p>
+                                <p className="font-medium">{order?.status}</p>
                             </div>
-                            <div>
-                                <p className="text-sm text-gray-600">Prix total</p>
-                                <p className="font-medium text-lg text-green-600">{totalPrice.toFixed(2)}€</p>
-                            </div>
-                            <div className="col-span-3">
+                            <div className="col-span-2">
                                 <p className="text-sm text-gray-600">Description</p>
                                 <p className="font-medium">{order?.description_order}</p>
                             </div>
@@ -331,99 +280,83 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                                     <p className="text-sm text-gray-600">Prix unitaire: {orderArticle.price}€</p>
                                                     <p className="text-sm text-gray-600">Prix total: {orderArticle.price * orderArticle.quantity * 2000}€</p>
                                                 </div>
-                                                {canModifyArticles() && (
-                                                    <div className="mt-4 flex gap-2">
-                                                        <button 
-                                                            onClick={() => handleEditArticle(orderArticle)}
-                                                            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-                                                        >
-                                                            Modifier
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
-                                                            className="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
-                                                        >
-                                                            Supprimer
-                                                        </button>
-                                                    </div>
-                                                )}
+                                                <div className="mt-4 flex gap-2">
+                                                    <button 
+                                                        onClick={() => handleEditArticle(orderArticle)}
+                                                        className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                                                    >
+                                                        Modifier
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteArticle(orderArticle.id_order, orderArticle.id_article)}
+                                                        className="flex-1 bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+                                                    >
+                                                        Supprimer
+                                                    </button>
+                                                </div>
                                             </>
                                         )}
                                     </div>
                                 ))}
-                                {!isConfirmed && (
-                                    <div className="col-span-full mt-4"> 
-                                        <button 
-                                            onClick={() => handleSubmitPreparationOrder(orderId)}
-                                            className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors shadow-md"
-                                        >
-                                            Confirmer les articles de la commande
-                                        </button>
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>
                 </div>
 
-                {canModifyArticles() && (
-                    <>
-                        <div className="mb-8">
-                            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Rechercher un article</h2>
-                            <SearchBar articles={articles} onSearchResults={handleSearchResults} />
-                        </div>
+                <div className="mb-8">
+                    <h2 className="text-2xl font-semibold text-gray-800 mb-4">Rechercher un article</h2>
+                    <SearchBar articles={articles} onSearchResults={handleSearchResults} />
+                </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredArticles.map((article) => (
-                                <div key={article.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">{article.name}</h3>
-                                    <div className="space-y-2 mb-4">
-                                        <p className="text-gray-600">Prix: {article.price}€</p>
-                                        <p className="text-gray-600">Stock: {article.quantity}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredArticles.map((article) => (
+                        <div key={article.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">{article.name}</h3>
+                            <div className="space-y-2 mb-4">
+                                <p className="text-gray-600">Prix: {article.price}€</p>
+                                <p className="text-gray-600">Stock: {article.quantity}</p>
+                            </div>
+                            {articleToSelect?.id === article.id ? (
+                                <div className="mt-4 space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Input 
+                                            type="number" 
+                                            name="price" 
+                                            placeholder={`Prix : ${article.price}`}
+                                            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})} 
+                                        />
+                                        <Input 
+                                            type="number" 
+                                            name="quantity" 
+                                            placeholder="Nombre de lots" 
+                                            onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0})}
+                                        />
                                     </div>
-                                    {articleToSelect?.id === article.id ? (
-                                        <div className="mt-4 space-y-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <Input 
-                                                    type="number" 
-                                                    name="price" 
-                                                    placeholder={`Prix : ${article.price}`}
-                                                    onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) || 0})} 
-                                                />
-                                                <Input 
-                                                    type="number" 
-                                                    name="quantity" 
-                                                    placeholder="Nombre de lots" 
-                                                    onChange={(e) => setFormData({ ...formData, quantity: parseFloat(e.target.value) || 0})}
-                                                />
-                                            </div>
-                                            <div className="text-sm space-y-1">
-                                                <p className="text-gray-600">Quantité totale: {formData.quantity * 2000}</p>
-                                                <p className="text-gray-600">Prix total: {formData.price * formData.quantity * 2000}€</p>
-                                                <p className="text-gray-600">Quantité restante: {article.quantity - formData.quantity * 2000}</p>
-                                            </div>
-                                            <button 
-                                                type='submit' 
-                                                onClick={() => handleSubmitAddArticle()}
-                                                className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
-                                            >
-                                                Confirmer l'ajout
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <button 
-                                            type='submit' 
-                                            onClick={() => handleSelectArticle(article)}
-                                            className="w-full gap-2 bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 transition-all duration-200"
-                                            >
-                                            Ajouter cet article
-                                        </button>
-                                    )}
+                                    <div className="text-sm space-y-1">
+                                        <p className="text-gray-600">Quantité totale: {formData.quantity * 2000}</p>
+                                        <p className="text-gray-600">Prix total: {formData.price * formData.quantity * 2000}€</p>
+                                        <p className="text-gray-600">Quantité restante: {article.quantity - formData.quantity * 2000}</p>
+                                    </div>
+                                    <button 
+                                        type='submit' 
+                                        onClick={() => handleSubmitAddArticle()}
+                                        className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors"
+                                    >
+                                        Confirmer l'ajout
+                                    </button>
                                 </div>
-                            ))}
+                            ) : (
+                                <button 
+                                    type='submit' 
+                                    onClick={() => handleSelectArticle(article)}
+                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+                                >
+                                    Ajouter cet article
+                                </button>
+                            )}
                         </div>
-                    </>
-                )}
+                    ))}
+                </div>
             </div>
         </div>
     );

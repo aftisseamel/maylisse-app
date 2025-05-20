@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/client';
 import { Tables } from '@/database.types';
 import { use, useEffect, useState } from 'react';
-import data_orders from '../../datas/data_orders';
+import data_orders from '../../../datas/data_orders';
 
 
 export default function Ready_to_deliever({ params }: { params: Promise<{ id: string }> }) {

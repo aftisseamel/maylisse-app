@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
-import NavigationBar from '@/app/components/NavigationBar';
-import SearchBarDeliveryMan from '@/app/components/SearchBarDeliveryMan';
+import NavigationBar from '@/components/NavigationBar';
+import SearchBarDeliveryMan from '@/components/SearchBarDeliveryMan';
 
 export default function DeliveryManPage() {
   const [deliveryMen, setDeliveryMen] = useState<Tables<"delivery_man">[]>([]);

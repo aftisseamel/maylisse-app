@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
-import NavigationBar from '@/app/components/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function AdminPage() {
   const [stats, setStats] = useState({

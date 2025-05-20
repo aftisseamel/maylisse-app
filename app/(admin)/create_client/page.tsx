@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from './action';
 import { useTransition } from 'react';
-import NavigationBar from '@/app/components/NavigationBar';
+import NavigationBar from '@/components/NavigationBar';
 
 export default function Create_client() {
     const [isPending, startTransition] = useTransition();

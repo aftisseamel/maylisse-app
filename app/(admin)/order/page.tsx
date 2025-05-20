@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Tables } from '@/database.types';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import SearchBarOrders from "../../components/SearchBarOrders";
-import { data_orders } from '@/app/datas/data_orders';
-import NavigationBar from '@/app/components/NavigationBar';
+import SearchBarOrders from "../../../components/SearchBarOrders";
+import { data_orders } from '@/datas/data_orders';
+import NavigationBar from '@/components/NavigationBar';
 import { createClient } from '@/utils/supabase/client';
 import { jsPDF } from 'jspdf';
 
