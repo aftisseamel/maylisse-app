@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/client';
-import data_orders from '@/app/datas/data_orders';
+import data_orders from '@/datas/data_orders';
 
 
 type orderStatus = 'prepared' | 'delivering' | 'delivered' | 'finished';
