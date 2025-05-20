@@ -14,7 +14,6 @@ export default function Page() {
   const [filteredArticles, setFilteredArticles] = useState<Tables<"article">[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [quantityChanges, setQuantityChanges] = useState<{ [key: number]: number }>({});
-  const [editingArticle, setEditingArticle] = useState<{ id: number; price: number } | null>(null);
   const [priceChanges, setPriceChanges] = useState<{ [key: number]: number }>({});
   const [editArticleId, setEditArticleId] = useState<number | null>(null);
   const [editedArticleData, setEditedArticleData] = useState<{

@@ -32,7 +32,7 @@ create table article (
     id serial primary key,
     name varchar(255) not null unique,
     price numeric(18, 2) not null,
-    quantity integer not null default 0,
+    quantity bigint not null default 0,
     description text,
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now()                
@@ -85,7 +85,8 @@ create table "order" (
     delivery_address text not null,
     pseudo_delivery_man varchar(255) references delivery_man(pseudo_delivery_man) on delete set null,
     name_client varchar(255) not null references client(name) on delete set null,
-    description_order text not null
+    description_order text not null,
+    comment_order_deliveryMan text 
 );
 
 

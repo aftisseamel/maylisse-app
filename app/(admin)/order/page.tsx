@@ -14,6 +14,7 @@ type OrderStatus = 'initiated' | 'preparation' | 'prepared' | 'delivering' | 'de
 
 export default function Page() {
     const router = useRouter();
+
     const [orders, setOrders] = useState<Tables<"order">[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Tables<"order">[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -31,19 +32,16 @@ export default function Page() {
             try {
                 const supabase = createClient();
                 
-                // Récupérer les commandes
                 const data = await data_orders();
                 setOrders(data);
                 setFilteredOrders(data);
 
-                // Calculer le nombre de commandes par statut
                 const counts = data.reduce((acc, order) => {
                     acc[order.status] = (acc[order.status] || 0) + 1;
                     return acc;
                 }, {} as { [key: string]: number });
                 setStatusCounts(counts);
 
-                // Récupérer les livreurs
                 const { data: deliveryMenData, error: deliveryMenError } = await supabase
                     .from('delivery_man')
                     .select('pseudo_delivery_man');
@@ -54,7 +52,6 @@ export default function Page() {
                     setDeliveryMen(deliveryMenData || []);
                 }
 
-                // Récupérer les clients
                 const { data: clientsData, error: clientsError } = await supabase
                     .from('client')
                     .select('name');
@@ -65,7 +62,6 @@ export default function Page() {
                     setClients(clientsData || []);
                 }
 
-                // Récupérer les articles pour les commandes en préparation ou plus
                 const preparationAndAfter = ['preparation', 'prepared', 'delivering', 'delivered', 'finished'];
                 const ordersToFetch = data.filter(order => preparationAndAfter.includes(order.status));
                 
@@ -78,7 +74,6 @@ export default function Page() {
                     if (error) {
                         console.error('Error fetching order articles:', error);
                     } else {
-                        // Organiser les articles par commande
                         const articlesByOrder = articlesData.reduce((acc, item) => {
                             if (!acc[item.id_order]) {
                                 acc[item.id_order] = [];
@@ -144,14 +139,12 @@ export default function Page() {
 
             if (error) throw error;
 
-            // Mettre à jour les listes locales
             const updatedOrders = orders.map(order =>
                 order.id === orderId ? { ...order, status: newStatus } : order
             );
             setOrders(updatedOrders);
             setFilteredOrders(updatedOrders);
 
-            // Mettre à jour les compteurs de statut
             const newCounts = { ...statusCounts };
             const oldStatus = orders.find(o => o.id === orderId)?.status;
             if (oldStatus) {
@@ -183,7 +176,6 @@ export default function Page() {
 
         const supabase = createClient();
         try {
-            // D'abord supprimer les articles de la commande
             const { error: deleteArticlesError } = await supabase
                 .from('order_article')
                 .delete()
@@ -195,7 +187,6 @@ export default function Page() {
                 return;
             }
 
-            // Ensuite supprimer la commande
             const { error: deleteOrderError } = await supabase
                 .from('order')
                 .delete()
@@ -251,33 +242,27 @@ export default function Page() {
         const doc = new jsPDF();
         const articles = orderArticles[order.id] || [];
         
-        // En-tête
         doc.setFontSize(20);
         doc.text('Facture', 105, 20, { align: 'center' });
         
-        // Informations de la commande
         doc.setFontSize(12);
         doc.text(`Commande #${order.id}`, 20, 40);
         doc.text(`Date: ${new Date(order.created_at || '').toLocaleDateString()}`, 20, 50);
         
-        // Informations client
         doc.text('Client:', 20, 70);
         doc.text(order.name_client, 20, 80);
         doc.text('Adresse de livraison:', 20, 90);
         doc.text(order.delivery_address, 20, 100);
         
-        // Tableau des articles
         doc.setFontSize(12);
         doc.text('Articles', 20, 120);
         
-        // En-tête du tableau
         doc.setFontSize(10);
         doc.text('Article', 20, 130);
         doc.text('Quantité', 100, 130);
         doc.text('Prix unitaire', 130, 130);
         doc.text('Total', 170, 130);
         
-        // Lignes des articles
         let y = 140;
         let total = 0;
         
@@ -294,14 +279,11 @@ export default function Page() {
             }
         });
         
-        // Total
         doc.setFontSize(12);
         doc.text(`Total: ${total}€`, 170, y + 10, { align: 'right' });
         
-        // Statut de la commande
         doc.text(`Statut: ${order.status}`, 20, y + 30);
         
-        // Sauvegarder le PDF avec le nom du client et le numéro de commande
         const fileName = `${order.name_client}_${order.id}.pdf`;
         doc.save(fileName);
     };

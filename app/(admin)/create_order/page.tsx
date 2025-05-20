@@ -29,7 +29,6 @@ export default function CreateOrder() {
         const fetchData = async () => {
             const supabase = createClient();
             
-            // Fetch delivery men
             const { data: deliveryMenData, error: deliveryMenError } = await supabase
                 .from('delivery_man')
                 .select('*')
@@ -41,7 +40,6 @@ export default function CreateOrder() {
                 return;
             }
 
-            // Fetch clients
             const { data: clientsData, error: clientsError } = await supabase
                 .from('client')
                 .select('*')

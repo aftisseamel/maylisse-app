@@ -14,7 +14,6 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [editClientId, setEditClientId] = useState<number | null>(null);
   const [editedClientData, setEditedClientData] = useState<Partial<Tables<"client">>>({});
-  const [clientOrders, setClientOrders] = useState<{ [key: string]: Tables<"order">[] }>({});
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -23,7 +22,6 @@ export default function Page() {
         setClients(data);
         setFilteredClients(data);
         
-        // Récupérer les commandes pour chaque client
         const supabase = createClient();
         const { data: ordersData, error } = await supabase
           .from('order')
@@ -32,7 +30,6 @@ export default function Page() {
 
         if (error) throw error;
 
-        // Organiser les commandes par client
         const ordersByClient = ordersData.reduce((acc, order) => {
           const clientName = order.name_client;
           if (!acc[clientName]) {
@@ -42,7 +39,6 @@ export default function Page() {
           return acc;
         }, {} as { [key: string]: Tables<"order">[] });
 
-        setClientOrders(ordersByClient);
       } catch (err) {
         console.error('Error:', err);
       } finally {
@@ -187,7 +183,6 @@ export default function Page() {
                         </p>
                       )}
                       
-                      {/* Bouton pour voir les commandes */}
                       <div className="mt-4">
                         <Link
                           href={`/clientID/${client.name}`}

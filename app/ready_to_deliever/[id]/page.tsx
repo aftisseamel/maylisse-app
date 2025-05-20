@@ -8,7 +8,6 @@ import data_orders from '../../datas/data_orders';
 
 export default function Ready_to_deliever({ params }: { params: Promise<{ id: string }> }) {
     const idDelieveryMan = parseInt(use(params).id);
-    const [deliveryMan, setDeliveryMan] = useState<Tables<"delivery_man"> | null>(null);
 
     console.log("id livreur : ", idDelieveryMan)
 

@@ -4,7 +4,10 @@ import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/client';
 import data_orders from '@/app/datas/data_orders';
-import Link from 'next/link';
+
+
+type orderStatus = 'prepared' | 'delivering' | 'delivered' | 'finished';
+
 
 export default function DeliveryManPage({ params }: { params: Promise<{ id: string }> }) {
     const idDelieveryMan = parseInt(use(params).id);
@@ -60,12 +63,13 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 throw error;
             }
 
-            const allOrders = await data_orders();
-            const deliveryManOrders = allOrders.filter(o => 
-                o.pseudo_delivery_man === deliveryMan?.pseudo_delivery_man && 
-                (o.status === 'prepared' || o.status === 'delivering' || o.status === 'delivered' || o.status === 'finished')
+            setOrders(prevOrders => 
+                prevOrders.map(order => 
+                    order.id === orderId 
+                        ? { ...order, status: newStatus }
+                        : order
+                )
             );
-            setOrders(deliveryManOrders);
 
         } catch (error) {
             console.error('Error updating order status:', error);
@@ -78,6 +82,24 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
             ...prev,
             [orderId]: comment
         }));
+        const supabase = createClient();
+
+        try {
+        const  error = supabase
+            .from('order')
+            .update({ 'comment_order_deliveryman': comment })
+            .eq('id', orderId)
+            .then(({ error }) => {
+                if (error) {
+                    console.error('Error updating comment:', error);
+                    alert('Une erreur est survenue lors de la mise à jour du commentaire');
+                }
+            });
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            alert('Une erreur est survenue lors de la mise à jour du commentaire');
+        }
+       
     };
 
     useEffect(() => {
@@ -97,7 +119,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 const allOrders = await data_orders();
                 const deliveryManOrders = allOrders.filter(o => 
                     o.pseudo_delivery_man === deliveryManData.pseudo_delivery_man && 
-                    (o.status === 'prepared' || o.status === 'delivering' || o.status === 'delivered' || o.status === 'finished')
+                    ['prepared', 'delivering', 'delivered', 'finished'].includes(o.status as orderStatus)
                 );
                 setOrders(deliveryManOrders);
 
@@ -184,10 +206,10 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                         className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                         <option value="all">Tous les statuts</option>
-                        <option value="prepared">Préparées</option>
-                        <option value="delivering">En livraison</option>
-                        <option value="delivered">Livrées</option>
-                        <option value="finished">Terminées</option>
+                        <option value="prepared">À livrer</option>
+                        <option value="delivering">En cours de livraison</option>
+                        <option value="delivered">Livré</option>
+                        <option value="finished">Terminé</option>
                     </select>
                 </div>
 
@@ -234,7 +256,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
 
                                 {order.status === 'delivered' && (
                                     <div>
-                                        <p className="text-sm font-medium text-gray-500 mb-2">Commentaire (optionnel)</p>
+                                        <p className="text-sm font-medium text-gray-500 mb-2">Commentaire</p>
                                         <textarea
                                             value={comments[order.id] || ''}
                                             onChange={(e) => handleCommentChange(order.id, e.target.value)}
@@ -255,14 +277,14 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                                                 ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
                                                 : order.status === 'delivering'
                                                 ? 'bg-green-600 hover:bg-green-700 text-white'
-                                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                                : 'bg-blue-600 hover:bg-blue-800 text-white'
                                         }`}
                                     >
                                         {order.status === 'prepared' 
                                             ? 'Commencer la livraison' 
-                                            : order.status === 'delivering'
-                                            ? 'Finir la livraison'
-                                            : 'Finaliser la commande'}
+                                            : order.status === 'delivering' 
+                                            ? 'Marquer comme livré'
+                                            : 'Terminer la commande'}
                                     </button>
                                 )}
                             </div>

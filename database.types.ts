@@ -110,6 +110,7 @@ export type Database = {
       }
       order: {
         Row: {
+          comment_order_deliveryman: string | null
           created_at: string | null
           delivery_address: string
           description_order: string
@@ -120,6 +121,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          comment_order_deliveryman?: string | null
           created_at?: string | null
           delivery_address: string
           description_order: string
@@ -130,6 +132,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          comment_order_deliveryman?: string | null
           created_at?: string | null
           delivery_address?: string
           description_order?: string
