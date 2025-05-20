@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-import data_orders from '@/app/datas/data_orders';
+import data_orders from '@/datas/data_orders';
 
 jest.mock('@/utils/supabase/client');
 

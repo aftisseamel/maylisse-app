@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client';
-import data_delivery_men from '@/app/datas/data_delivery_men';
+import data_delivery_men from '@/datas/data_delivery_men';
 
 jest.mock('@/utils/supabase/client');
 
