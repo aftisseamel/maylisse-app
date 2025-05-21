@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { Tables } from '@/database.types';
 import { createClient } from '@/utils/supabase/client';
 import data_orders from '@/datas/data_orders';
-
+import DeliveryManNavigationBar from '@/components/DeliveryManNavigationBar';
 
 type orderStatus = 'prepared' | 'delivering' | 'delivered' | 'finished';
 
@@ -158,8 +158,11 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
+                        <DeliveryManNavigationBar />
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                         Commandes à livrer par {deliveryMan.pseudo_delivery_man}
                     </h1>

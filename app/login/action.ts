@@ -39,12 +39,9 @@ export async function login(formData: FormData) {
     if (profile && profile.role_profile === 'delivery_man' && deliveryMan) {
       revalidatePath('/', 'layout')
       redirect(`/delivery_manID/${deliveryMan.id}`);
+    }
   }
-
 }
-
-}
-
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
@@ -76,8 +73,22 @@ export async function signup(formData: FormData) {
     if (profile && profile.role_profile === 'delivery_man') {
       revalidatePath('/', 'layout')
       redirect('/livreurs')
+    }
   }
-
 }
 
+export async function resetPassword(formData: FormData) {
+  const supabase = await createClient()
+  const email = formData.get('email') as string
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+  })
+
+  if (error) {
+    console.error('Error sending reset password email:', error)
+    return { error: 'Une erreur est survenue lors de l\'envoi de l\'email de réinitialisation' }
+  }
+
+  return { success: true }
 }
