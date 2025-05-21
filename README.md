@@ -23,6 +23,7 @@ npm install -D @testing-library/jest-dom @testing-library/react @testing-library
 ## Installation
 
 1. **Cloner le projet**
+
 De la branche main.
 
 ```bash
