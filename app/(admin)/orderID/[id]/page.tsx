@@ -124,7 +124,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
         
         if (response.success) {
             const supabase = createClient();
-            // Mettre à jour le stock de l'article
             const { error: updateStockError } = await supabase
                 .from('article')
                 .update({ quantity: article.quantity - quantityNeeded })
@@ -136,7 +135,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                 return;
             }
 
-            // Mettre à jour la liste des articles
             const { data: updatedArticles, error: articlesError } = await supabase
                 .from('article')
                 .select('*');
@@ -155,7 +153,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                 setOrderArticles(orderArticlesData);
             }
             
-            // Réinitialiser le formulaire
             setArticleToSelect(null);
             setFormData({
                 ...formData,
@@ -199,7 +196,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             return;
         }
 
-        // Restaurer le stock de l'article
         const { error: updateStockError } = await supabase
             .from('article')
             .update({ quantity: article.quantity + quantityToRestore })
@@ -211,7 +207,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             return;
         }
 
-        // Mettre à jour la liste des articles
         const { data: updatedArticles, error: articlesError } = await supabase
             .from('article')
             .select('*');
@@ -288,7 +283,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             return;
         }
 
-        // Mettre à jour le stock de l'article
         const { error: updateStockError } = await supabase
             .from('article')
             .update({ quantity: article.quantity - quantityDifference })
@@ -300,7 +294,6 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
             return;
         }
 
-        // Mettre à jour la liste des articles
         const { data: updatedArticles, error: articlesError } = await supabase
             .from('article')
             .select('*');

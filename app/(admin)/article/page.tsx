@@ -7,6 +7,7 @@ import SearchBar from "../../../components/SearchBarArticles";
 import data_articles from "../../../datas/data_articles";
 import { createClient } from '@/utils/supabase/client';
 import NavigationBar from '@/components/NavigationBar';
+import { deleteArticle } from './action';
 
 export default function Page() {
 
@@ -16,23 +17,28 @@ export default function Page() {
   const [quantityChanges, setQuantityChanges] = useState<{ [key: number]: number }>({});
   const [priceChanges, setPriceChanges] = useState<{ [key: number]: number }>({});
   const [editArticleId, setEditArticleId] = useState<number | null>(null);
-  const [editedArticleData, setEditedArticleData] = useState<{
-    name?: string;
-    description?: string;
-  }>({});
+  const [editedArticleData, setEditedArticleData] = useState<Partial<Tables<"article">>>({});
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchArticles = async () => {
       try {
-        const data = await data_articles();
-        setArticles(data);
-        setFilteredArticles(data);
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('article')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setArticles(data || []);
+        setFilteredArticles(data || []);
       } catch (err) {
         console.error('Error:', err);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchArticles();
   }, []);
 
@@ -137,7 +143,8 @@ export default function Page() {
     setEditArticleId(article.id);
     setEditedArticleData({
       name: article.name,
-      description: article.description || ''
+      description: article.description || undefined,
+      price: article.price
     });
   };
 
@@ -168,6 +175,21 @@ export default function Page() {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet article ? Cette action est irréversible.')) {
+      return;
+    }
+
+    const result = await deleteArticle(id);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setArticles(prev => prev.filter(article => article.id !== id));
+    setFilteredArticles(prev => prev.filter(article => article.id !== id));
+  };
+
   if (isLoading) {
     return <div>Chargement...</div>;
   }
@@ -192,6 +214,12 @@ export default function Page() {
               </Link>
             </div>
           </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredArticles.map((article) => (
@@ -230,17 +258,38 @@ export default function Page() {
                   <>
                     <div className="flex justify-between items-start mb-4">
                       <h3 className="font-bold text-lg text-gray-800">{article.name}</h3>
-                      <button
-                        onClick={() => handleEditArticle(article)}
-                        className="text-gray-500 hover:text-gray-700 transition-colors"
-                        title="Modifier"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => {
+                            setEditArticleId(article.id);
+                            setEditedArticleData({
+                              name: article.name,
+                              description: article.description || undefined,
+                              price: article.price
+                            });
+                          }}
+                          className="text-indigo-600 hover:text-indigo-800"
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          onClick={() => handleDelete(article.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-gray-600 mb-4">{article.description}</p>
+                    <div className="space-y-2">
+                      <p className="text-gray-600">
+                        <span className="font-medium">Prix:</span> {article.price}€
+                      </p>
+                      {article.description && (
+                        <p className="text-gray-600">
+                          <span className="font-medium">Description:</span> {article.description}
+                        </p>
+                      )}
+                    </div>
                     
                     <div className="pt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between mb-2">

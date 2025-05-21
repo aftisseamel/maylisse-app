@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import NavigationBar from '@/components/NavigationBar';
 import SearchBarDeliveryMan from '@/components/SearchBarDeliveryMan';
+import { deleteDeliveryMan } from './action';
 
 export default function DeliveryManPage() {
   const [deliveryMen, setDeliveryMen] = useState<Tables<"delivery_man">[]>([]);
@@ -13,6 +14,7 @@ export default function DeliveryManPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [editDeliveryManId, setEditDeliveryManId] = useState<number | null>(null);
   const [editedDeliveryManData, setEditedDeliveryManData] = useState<Partial<Tables<"delivery_man">>>({});
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDeliveryMen = async () => {
@@ -38,6 +40,21 @@ export default function DeliveryManPage() {
 
   const handleSearchResults = (results: Tables<"delivery_man">[]) => {
     setFilteredDeliveryMen(results);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce livreur ?')) {
+      return;
+    }
+
+    const result = await deleteDeliveryMan(id);
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setDeliveryMen(prev => prev.filter(dm => dm.id !== id));
+    setFilteredDeliveryMen(prev => prev.filter(dm => dm.id !== id));
   };
 
   const toggleStatus = async (id: number, currentStatus: 'available' | 'unavailable') => {
@@ -108,29 +125,33 @@ export default function DeliveryManPage() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <NavigationBar />
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-            <h1 className="text-2xl font-bold">Livreurs</h1>
-            <div className="flex items-center gap-4">
-              <div className="w-full md:w-80">
-                <SearchBarDeliveryMan deliveryMen={deliveryMen} onSearchResults={handleSearchResults} />
-              </div>
-              <Link
-                href="/create_delivery_man"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
-              >
-                <span className="text-xl">+</span>
-                <span>Nouveau livreur</span>
-              </Link>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">Livreurs</h1>
+            <Link
+              href="/create_delivery_man"
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Ajouter un livreur
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {error && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+              {error}
+            </div>
+          )}
+
+          <div className="mb-6">
+            <SearchBarDeliveryMan deliveryMen={deliveryMen} onSearchResults={handleSearchResults} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDeliveryMen.map((deliveryMan) => (
-              <div key={deliveryMan.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+              <div key={deliveryMan.id} className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
                 {editDeliveryManId === deliveryMan.id ? (
                   <div className="space-y-3">
                     <input
@@ -187,26 +208,24 @@ export default function DeliveryManPage() {
                 ) : (
                   <>
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className="font-bold text-lg text-gray-800">{deliveryMan.pseudo_delivery_man}</h3>
-                      <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-semibold text-gray-900">
+                        {deliveryMan.pseudo_delivery_man}
+                      </h2>
+                      <div className="flex space-x-2">
                         <button
-                          onClick={() => handleEditDeliveryMan(deliveryMan)}
-                          className="text-gray-500 hover:text-gray-700 transition-colors"
-                          title="Modifier"
+                          onClick={() => {
+                            setEditDeliveryManId(deliveryMan.id);
+                            setEditedDeliveryManData(deliveryMan);
+                          }}
+                          className="text-indigo-600 hover:text-indigo-800"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                          </svg>
+                          Modifier
                         </button>
                         <button
-                          onClick={() => toggleStatus(deliveryMan.id, deliveryMan.status)}
-                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200 ${
-                            deliveryMan.status === 'available'
-                              ? 'bg-green-100 text-green-600 hover:bg-green-200'
-                              : 'bg-red-100 text-red-600 hover:bg-red-200'
-                          }`}
+                          onClick={() => handleDelete(deliveryMan.id)}
+                          className="text-red-600 hover:text-red-800"
                         >
-                          {deliveryMan.status === 'available' ? 'Disponible' : 'Indisponible'}
+                          Supprimer
                         </button>
                       </div>
                     </div>

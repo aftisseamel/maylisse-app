@@ -118,33 +118,27 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
         const doc = new jsPDF();
         const articles = orderArticles[order.id] || [];
         
-        // En-tête
         doc.setFontSize(20);
         doc.text('Facture', 105, 20, { align: 'center' });
         
-        // Informations de la commande
         doc.setFontSize(12);
         doc.text(`Commande #${order.id}`, 20, 40);
         doc.text(`Date: ${new Date(order.created_at || '').toLocaleDateString()}`, 20, 50);
         
-        // Informations client
         doc.text('Client:', 20, 70);
         doc.text(client?.name || '', 20, 80);
         doc.text('Adresse de livraison:', 20, 90);
         doc.text(order.delivery_address, 20, 100);
         
-        // Tableau des articles
         doc.setFontSize(12);
         doc.text('Articles', 20, 120);
         
-        // En-tête du tableau
         doc.setFontSize(10);
         doc.text('Article', 20, 130);
         doc.text('Quantité', 100, 130);
         doc.text('Prix unitaire', 130, 130);
         doc.text('Total', 170, 130);
         
-        // Lignes des articles
         let y = 140;
         let total = 0;
         
@@ -161,14 +155,11 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
             }
         });
         
-        // Total
         doc.setFontSize(12);
         doc.text(`Total: ${total}€`, 170, y + 10, { align: 'right' });
         
-        // Statut de la commande
         doc.text(`Statut: ${order.status}`, 20, y + 30);
         
-        // Sauvegarder le PDF avec le nom du client et le numéro de commande
         const fileName = `${client?.name}_${order.id}.pdf`;
         doc.save(fileName);
     };
@@ -212,7 +203,6 @@ export default function ClientPage({ params }: { params: Promise<{ name: string 
                     </div>
                 </div>
 
-                {/* Liste des commandes */}
                 <div className="bg-white p-6 rounded-lg shadow-lg">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold">Commandes du client</h2>

@@ -7,8 +7,7 @@ import { createClient } from '@/utils/supabase/server'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
+  
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -24,7 +23,6 @@ export async function login(formData: FormData) {
     redirect('/error')
   }
 
-  // check the profile of the user : admin or delivery_man
   if (signInData !== null) {
     const userId = signInData.session?.user?.id;
 
@@ -46,8 +44,6 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -81,13 +77,33 @@ export async function resetPassword(formData: FormData) {
   const supabase = await createClient()
   const email = formData.get('email') as string
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
+    
+    if (error) {
+      console.error('Error sending reset password email:', error)
+      return { error: 'Une erreur est survenue lors de l\'envoi de l\'email de réinitialisation' }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Unexpected error:', error)
+    return { error: 'Une erreur inattendue est survenue' }
+  }
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+  const email = formData.get('email') as string
+
+  const { error } = await supabase.auth.updateUser({
+    password: password
   })
 
   if (error) {
-    console.error('Error sending reset password email:', error)
-    return { error: 'Une erreur est survenue lors de l\'envoi de l\'email de réinitialisation' }
+    console.error('Error updating password:', error)
+    return { error: 'Une erreur est survenue lors de la mise à jour du mot de passe' }
   }
 
   return { success: true }

@@ -44,3 +44,5 @@ test2
 
 .vscode
 .swc
+
+.env.local

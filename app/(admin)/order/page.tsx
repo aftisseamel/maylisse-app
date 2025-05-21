@@ -9,6 +9,7 @@ import { data_orders } from '@/datas/data_orders';
 import NavigationBar from '@/components/NavigationBar';
 import { createClient } from '@/utils/supabase/client';
 import { jsPDF } from 'jspdf';
+import { deleteOrder } from './action';
 
 type OrderStatus = 'initiated' | 'preparation' | 'prepared' | 'delivering' | 'delivered' | 'finished' | 'canceled';
 
@@ -23,6 +24,7 @@ export default function Page() {
     const [clients, setClients] = useState<{ name: string }[]>([]);
     const [orderArticles, setOrderArticles] = useState<{ [key: number]: (Tables<"order_article"> & { article: Tables<"article"> | null })[] }>({});
     const [statusCounts, setStatusCounts] = useState<{ [key: string]: number }>({});
+    const [error, setError] = useState<string | null>(null);
 
     const [editOrderId, setEditOrderId] = useState<number | null>(null);
     const [editedOrderData, setEditedOrderData] = useState<Partial<Tables<"order">>>({});
@@ -288,6 +290,21 @@ export default function Page() {
         doc.save(fileName);
     };
 
+    const handleDelete = async (id: number) => {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette commande ? Cette action est irréversible.')) {
+            return;
+        }
+
+        const result = await deleteOrder(id);
+        if (result.error) {
+            setError(result.error);
+            return;
+        }
+
+        setOrders(prev => prev.filter(order => order.id !== id));
+        setFilteredOrders(prev => prev.filter(order => order.id !== id));
+    };
+
     if (isLoading) return <div>Chargement...</div>;
 
     return (
@@ -322,6 +339,12 @@ export default function Page() {
                             </Link>
                         </div>
                     </div>
+
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredOrders.map((order) => (
