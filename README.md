@@ -75,8 +75,15 @@ Les rôles utilisateurs (admin, delivery_man) sont gérés directement dans Supa
    - `delivery_man` : Accès limité à l'interface livreur
 
 5. **Migrations de la base de données**
+<<<<<<< HEAD
 ### remarque : Dans supabase il faut désactiver les RLS sur toutes les tables pour que ça fonctionne.
 Exécutez les migrations suivantes dans l'ordre dans l'éditeur SQL de Supabase, ou dans le fichier migrations qui sera créé dans votre editeur :
+=======
+# remarque : 
+Dans supabase il faut désactiver les RLS sur toutes les tables pour que ça fonctionne.
+
+Exécutez les migrations suivantes dans l'ordre dans l'éditeur SQL de Supabase :
+>>>>>>> 0349d20 (pdf des livrables$)
 
 ```sql
 
