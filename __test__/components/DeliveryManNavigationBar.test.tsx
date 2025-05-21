@@ -1,9 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import NavigationBar from '@/components/NavigationBar';
+import DeliveryManNavigationBar from '@/components/DeliveryManNavigationBar';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 
-// Mock des dépendances
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
@@ -12,8 +11,8 @@ jest.mock('@/utils/supabase/client', () => ({
   createClient: jest.fn(),
 }));
 
-describe('NavigationBar', () => {
-  it('should logout and redirect to /login when clicking Déconnexion', async () => {
+describe('DeliveryManNavigationBar', () => {
+  it('should call signOut and redirect to /login on logout click', async () => {
     const pushMock = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push: pushMock });
 
@@ -24,7 +23,7 @@ describe('NavigationBar', () => {
       },
     });
 
-    render(<NavigationBar />);
+    render(<DeliveryManNavigationBar />);
 
     const logoutButton = screen.getByText('Déconnexion');
     fireEvent.click(logoutButton);
@@ -33,15 +32,5 @@ describe('NavigationBar', () => {
       expect(signOutMock).toHaveBeenCalled();
       expect(pushMock).toHaveBeenCalledWith('/login');
     });
-  });
-
-  it('should render all navigation links', () => {
-    render(<NavigationBar />);
-
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Articles')).toBeInTheDocument();
-    expect(screen.getByText('Commandes')).toBeInTheDocument();
-    expect(screen.getByText('Clients')).toBeInTheDocument();
-    expect(screen.getByText('Livreurs')).toBeInTheDocument();
   });
 });

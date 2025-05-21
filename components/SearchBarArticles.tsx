@@ -2,7 +2,6 @@
 
 import { Tables } from "@/database.types";
 import React, { ChangeEvent } from "react";
-import { AiOutlineSearch } from "react-icons/ai";
 import { IoSearch } from "react-icons/io5";
 
 const SearchBar = ({ 
