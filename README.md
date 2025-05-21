@@ -55,6 +55,27 @@ Pour configurer l'authentification et la base de données avec Supabase, suivez 
 - Configurer les routes d'authentification
 - Mettre en place la gestion des sessions
 
+### Gestion des Rôles
+
+Les rôles utilisateurs (admin, delivery_man) sont gérés directement dans Supabase :
+
+1. **Accéder à l'interface Supabase**
+   - Allez dans votre projet Supabase
+   - Naviguez vers "Authentication" > "Users"
+
+2. **Attribuer un rôle**
+   - Sélectionnez l'utilisateur
+   - Dans les métadonnées de l'utilisateur, ajoutez :
+     ```json
+     {
+       "role": "admin"  // ou "delivery_man"
+     }
+     ```
+
+3. **Rôles disponibles**
+   - `admin` : Accès complet à toutes les fonctionnalités
+   - `delivery_man` : Accès limité à l'interface livreur
+
 5. **Migrations de la base de données**
 
 Exécutez les migrations suivantes dans l'ordre dans l'éditeur SQL de Supabase :
