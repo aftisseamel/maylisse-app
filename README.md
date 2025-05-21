@@ -57,20 +57,18 @@ Pour configurer l'authentification et la base de données avec Supabase, suivez 
 
 ### Gestion des Rôles
 
+Un livreur ne pourra utiliser son compte créé jusqu'à ce que son mail soit créé grâce à l'admin dans la page create_delivery_man.
+
 Les rôles utilisateurs (admin, delivery_man) sont gérés directement dans Supabase :
 
 1. **Accéder à l'interface Supabase**
    - Allez dans votre projet Supabase
    - Naviguez vers "Authentication" > "Users"
+   - prendre l'uuid
 
 2. **Attribuer un rôle**
-   - Sélectionnez l'utilisateur
-   - Dans les métadonnées de l'utilisateur, ajoutez :
-     ```json
-     {
-       "role": "admin"  // ou "delivery_man"
-     }
-     ```
+   - Sélectionnez l'utilisateur dans la table des profile grace à son uuid et changer son role
+
 
 3. **Rôles disponibles**
    - `admin` : Accès complet à toutes les fonctionnalités
