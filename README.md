@@ -76,7 +76,7 @@ Les rôles utilisateurs (admin, delivery_man) sont gérés directement dans Supa
 
 5. **Migrations de la base de données**
 
-Exécutez les migrations suivantes dans l'ordre dans l'éditeur SQL de Supabase :
+Exécutez les migrations suivantes dans l'ordre dans l'éditeur SQL de Supabase, ou dans le fichier migrations qui sera créé dans votre editeur :
 
 ```sql
 
