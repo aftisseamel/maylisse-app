@@ -402,10 +402,20 @@ export default function OrderID( { params }: { params: Promise<{ id: string }> }
                                 <p className="text-sm text-gray-600">Statut</p>
                                 <p className="font-medium">{order?.status}</p>
                             </div>
+                            <div>
+                                <p className="text-sm text-gray-600">Livreur</p>
+                                <p className="font-medium">{order?.pseudo_delivery_man || 'Non assigné'}</p>
+                            </div>
                             <div className="col-span-2">
                                 <p className="text-sm text-gray-600">Description</p>
                                 <p className="font-medium">{order?.description_order}</p>
                             </div>
+                            {order?.comment_order_deliveryman && (
+                                <div className="col-span-2">
+                                    <p className="text-sm text-gray-600">Commentaire du livreur</p>
+                                    <p className="font-medium">{order.comment_order_deliveryman}</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

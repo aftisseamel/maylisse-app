@@ -464,13 +464,21 @@ export default function Page() {
                                             <p className="text-gray-600">{order.delivery_address}</p>
                                             <div className="text-sm space-y-1">
                                                 <p className="flex items-center gap-2">
-                                                    <span className="font-semibold text-gray-700">Livreur:</span>
-                                                    <span className="text-gray-600">{order.pseudo_delivery_man}</span>
-                                                </p>
-                                                <p className="flex items-center gap-2">
                                                     <span className="font-semibold text-gray-700">Client:</span>
                                                     <span className="text-gray-600">{order.name_client}</span>
                                                 </p>
+                                                {order.pseudo_delivery_man && (
+                                                    <p className="flex items-center gap-2">
+                                                        <span className="font-semibold text-gray-700">Livreur:</span>
+                                                        <span className="text-gray-600">{order.pseudo_delivery_man}</span>
+                                                    </p>
+                                                )}
+                                                {order.comment_order_deliveryman && (
+                                                    <p className="flex items-center gap-2">
+                                                        <span className="font-semibold text-gray-700">Commentaire livreur:</span>
+                                                        <span className="text-gray-600">{order.comment_order_deliveryman}</span>
+                                                    </p>
+                                                )}
                                             </div>
                                             {order.description_order && (
                                                 <p className="text-sm text-gray-600 mt-2">{order.description_order}</p>
