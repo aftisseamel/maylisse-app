@@ -246,6 +246,26 @@ export default function DeliveryManPage() {
                           <span className="font-medium">Adresse:</span> {deliveryMan.address_delivery_man}
                         </p>
                       )}
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <span className={`w-3 h-3 rounded-full mr-2 ${
+                            deliveryMan.status === 'available' ? 'bg-green-500' : 'bg-red-500'
+                          }`}></span>
+                          <span className="text-gray-600">
+                            {deliveryMan.status === 'available' ? 'Disponible' : 'Indisponible'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => toggleStatus(deliveryMan.id, deliveryMan.status)}
+                          className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                            deliveryMan.status === 'available'
+                              ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                              : 'bg-green-100 text-green-700 hover:bg-green-200'
+                          }`}
+                        >
+                          {deliveryMan.status === 'available' ? 'Marquer indisponible' : 'Marquer disponible'}
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
