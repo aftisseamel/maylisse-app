@@ -89,7 +89,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
             .from('order')
             .update({ 'comment_order_deliveryman': comment })
             .eq('id', orderId)
-            .then(({ error }) => {
+            .then(({ error }: { error: any }) => {
                 if (error) {
                     console.error('Error updating comment:', error);
                     alert('Une erreur est survenue lors de la mise à jour du commentaire');
@@ -117,7 +117,7 @@ export default function DeliveryManPage({ params }: { params: Promise<{ id: stri
                 setDeliveryMan(deliveryManData);
 
                 const allOrders = await data_orders();
-                const deliveryManOrders = allOrders.filter(o => 
+                const deliveryManOrders = allOrders.filter((o: Tables<"order">) => 
                     o.pseudo_delivery_man === deliveryManData.pseudo_delivery_man && 
                     ['prepared', 'delivering', 'delivered', 'finished'].includes(o.status as orderStatus)
                 );
